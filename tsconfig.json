@@ -18,8 +18,9 @@
     "noFallthroughCasesInSwitch": true,
     "outDir": "./dist",
     "noEmitOnError": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["vite/client"]
   },
-  "include": ["./src/**/*"],
+  "include": ["./src/index.ts"],
   "exclude": ["node_modules", "lib", "dist"]
 }

@@ -1,5 +1,6 @@
 import reactPlugin from "@vitejs/plugin-react-refresh";
 import { defineConfig } from "vite";
+import linariaPlugin from "vite-plugin-linaria";
 import * as packageJson from "./package.json";
 
 const config = defineConfig({
@@ -9,13 +10,10 @@ const config = defineConfig({
       name: "react-fukidashi",
     },
     rollupOptions: {
-      external: [
-        ...Object.keys(packageJson.dependencies),
-        ...Object.keys(packageJson.peerDependencies),
-      ],
+      external: [...Object.keys(packageJson.peerDependencies)],
     },
   },
-  plugins: [reactPlugin()],
+  plugins: [reactPlugin(), linariaPlugin()],
 });
 
 export default config;

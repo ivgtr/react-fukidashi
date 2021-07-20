@@ -9,7 +9,7 @@ module.exports = {
     "node/no-unpublished-import": [
       "error",
       {
-        allowModules: ["vite", "@vitejs/plugin-react-refresh", "vite-react-jsx"],
+        allowModules: ["vite", "@vitejs/plugin-react-refresh", "vite-plugin-linaria", "@linaria/*"],
       },
     ],
     "arrow-body-style": 0,

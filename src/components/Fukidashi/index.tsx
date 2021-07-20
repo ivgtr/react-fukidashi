@@ -1,9 +1,21 @@
+import { css } from "@linaria/core";
 import React from "react";
+import { FukidashiProps } from "../../types";
+import { FukidashiCore } from "./FukidashiCore";
 
-export const Fukidashi = () => {
+const styles = {
+  fukidashi: css`
+    position: relative;
+    font-size: 14px;
+    text-align: left;
+  `,
+};
+
+export const Fukidashi: React.FC<FukidashiProps> = (props) => {
   return (
-    <div>
-      <p>sample</p>
+    <div className={styles.fukidashi}>
+      {props.children}
+      <FukidashiCore {...props} />
     </div>
   );
 };
