@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "vite",
     "prebuild": "node -e 'fs.rmSync(`lib`, {recursive:true, force:true})'",
+    "prebuild:docs": "node -e 'fs.rmSync(`lib`, {recursive:true, force:true})'",
     "build": "vite build",
+    "build:docs": "vite build -c vite.docs.config.ts",
     "format": "prettier -w \"./src/**/*.{js,jsx,ts,tsx,css}\"",
     "lint": "eslint ./src/**/*.tsx"
   },
