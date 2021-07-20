@@ -8,24 +8,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: get npm cache directory path
+        id: npm-cache-dir-path
+        run: echo "::set-output name=dir::$(npm config get cache)"
       - uses: actions/cache@v2
-        id: yarn-cache
+        id: npm-cache
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-node-
       - name: use node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: 15
       - name: Build
         run: |
-          yarn --frozen-lockfile --ignore-optional
-          yarn build:docs
+          npm ci
+          npm run build:docs
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
