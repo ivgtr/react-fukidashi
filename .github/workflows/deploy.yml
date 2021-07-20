@@ -24,7 +24,7 @@ jobs:
           node-version: 15
       - name: Build
         run: |
-          yarn install --frozen-lockfile
+          yarn --frozen-lockfile --ignore-optional
           yarn build:docs
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

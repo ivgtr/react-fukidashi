@@ -13,14 +13,24 @@ const App = () => {
       }}
     >
       <div style={{ textAlign: "center" }}>
-        <Fukidashi text={["くぅ～疲れましたw これにて完結です！"]} placement={"top"}>
+        <Fukidashi text={"くぅ～疲れましたw これにて完結です！"} placement={"top"}>
           <Fukidashi
-            text={["実は、ネタレスしたら代行の話を持ちかけられたのが始まりでした"]}
+            text={[
+              "実は、ネタレスしたら代行の話を持ちかけられたのが始まりでした",
+              "本当は話のネタなかったのですが←",
+            ]}
             placement={"right"}
           >
-            <Fukidashi text={["本当は話のネタなかったのですが←"]} placement={"bottom"}>
+            <Fukidashi
+              text={"ご厚意を無駄にするわけには行かないので流行りのネタで挑んでみた所存ですw"}
+              placement={"bottom"}
+            >
               <Fukidashi
-                text={"ご厚意を無駄にするわけには行かないので流行りのネタで挑んでみた所存ですw"}
+                text={[
+                  "以下、まどか達のみんなへのメッセジをどぞ",
+                  "",
+                  "まどか「みんな、見てくれてありがとうちょっと腹黒なところも見えちゃったけど・・・気にしないでね！」",
+                ]}
                 placement={"left"}
               >
                 <div
