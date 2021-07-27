@@ -1,7 +1,7 @@
 {
   "name": "react-fukidashi",
   "description": "💭 react speech balloon component",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "./lib/react-fukidashi.umd.js",
   "module": "./lib/react-fukidashi.es.js",
   "types": "./lib/index.d.ts",
