@@ -12,27 +12,32 @@ const App = () => {
         alignItems: "center",
       }}
     >
-      <div style={{ textAlign: "center" }}>
-        <Fukidashi text={"くぅ～疲れましたw これにて完結です！"} placement={"top"}>
-          <Fukidashi
-            text={[
-              "実は、ネタレスしたら代行の話を持ちかけられたのが始まりでした",
-              "本当は話のネタなかったのですが←",
-            ]}
-            placement={"right"}
-          >
+      <Fukidashi text={"くぅ～疲れましたw これにて完結です！"} placement={"top"}>
+        <Fukidashi
+          text={[
+            "実は、ネタレスしたら代行の話を持ちかけられたのが始まりでした",
+            "本当は話のネタなかったのですが←",
+            "ご厚意を無駄にするわけには行かないので流行りのネタで挑んでみた所存ですw",
+          ]}
+          placement={"right"}
+        >
+          <Fukidashi text={"以下、まどか達のみんなへのメッセジをどぞ"} placement={"left"}>
             <Fukidashi
-              text={"ご厚意を無駄にするわけには行かないので流行りのネタで挑んでみた所存ですw"}
+              text={`まどか「みんな、見てくれてありがとう
+                ちょっと腹黒なところも見えちゃったけど・・・気にしないでね！」
+
+                さやか「いやーありがと！
+                私のかわいさは二十分に伝わったかな？」
+
+                マミ「見てくれたのは嬉しいけどちょっと恥ずかしいわね・・・」
+
+                京子「見てくれありがとな！
+                正直、作中で言った私の気持ちは本当だよ！」
+
+                ほむら「・・・ありがと」ﾌｧｻ`}
               placement={"bottom"}
             >
-              <Fukidashi
-                text={[
-                  "以下、まどか達のみんなへのメッセジをどぞ",
-                  "",
-                  "まどか「みんな、見てくれてありがとうちょっと腹黒なところも見えちゃったけど・・・気にしないでね！」",
-                ]}
-                placement={"left"}
-              >
+              <div style={{ textAlign: "center" }}>
                 <div
                   style={{
                     width: "120px",
@@ -46,11 +51,11 @@ const App = () => {
                     style={{ width: "100%", height: "100%", backgroundClip: "cover" }}
                   />
                 </div>
-              </Fukidashi>
+              </div>
             </Fukidashi>
           </Fukidashi>
         </Fukidashi>
-      </div>
+      </Fukidashi>
     </div>
   );
 };
