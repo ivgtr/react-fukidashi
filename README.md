@@ -2,12 +2,12 @@
 
 💭 react speech balloon component
 
-[![Deploy to gh-pages](https://github.com/ivgtr/react-fukidashi/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/ivgtr/react-fukidashi/actions/workflows/deploy.yml)
+[![gh-pages CI](https://github.com/ivgtr/react-fukidashi/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/ivgtr/react-fukidashi/actions/workflows/deploy.yml)
+[![publish CI](https://github.com/ivgtr/react-fukidashi/actions/workflows/publish.yml/badge.svg?branch=main)](https://github.com/ivgtr/react-fukidashi/actions/workflows/publish.yml)
 
-### 今後
+### future
 
-- 伺かの吹き出しのイメージ
-- いい感じにコンポーネントを複数設置して会話できるようになるといいね
+- コンポーネントを複数設置してキュー順に会話できるようになるといいね
 
 
 

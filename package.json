@@ -2,13 +2,29 @@
   "name": "react-fukidashi",
   "description": "💭 react speech balloon component",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "./lib/react-fukidashi.umd.js",
+  "module": "./lib/react-fukidashi.es.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/react-fukidashi.es.js",
+      "require": "./lib/react-fukidashi.umd.js"
+    },
+    "./style.css": "./lib/style.css"
+  },
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "react",
+    "component"
+  ],
   "license": "MIT",
   "scripts": {
     "dev": "vite",
     "prebuild": "node -e 'fs.rmSync(`lib`, {recursive:true, force:true})'",
-    "prebuild:docs": "node -e 'fs.rmSync(`lib`, {recursive:true, force:true})'",
-    "build": "vite build",
+    "prebuild:docs": "node -e 'fs.rmSync(`dist`, {recursive:true, force:true})'",
+    "build": "vite build && tsc --emitDeclarationOnly",
     "build:docs": "vite build -c vite.docs.config.ts",
     "format": "prettier -w \"./src/**/*.{js,jsx,ts,tsx,css}\"",
     "lint": "eslint ./src/**/*.tsx"
