@@ -5,6 +5,7 @@ import { PlacementType } from "../../types";
 type Props = {
   placement: PlacementType;
   width: number;
+  gap: number;
 };
 
 const styles = {
@@ -48,13 +49,13 @@ const styles = {
   `,
 };
 
-export const Box: React.FC<Props> = ({ children, placement }) => {
+export const Box: React.FC<Props> = ({ children, placement, width, gap }) => {
   const setPosition = useMemo(() => {
     let position = {};
     switch (placement) {
       case "top":
         position = {
-          "--box-bottom": `calc(100% + 50px)`,
+          "--box-bottom": `calc(100% + ${gap}px)`,
           "--box-left": "calc(50% - 150px)",
           "--arrow-before-top": "100%",
           "--arrow-before-left": "10%",
@@ -65,7 +66,7 @@ export const Box: React.FC<Props> = ({ children, placement }) => {
       case "right":
         position = {
           "--box-top": `50%`,
-          "--box-left": "calc(100% + 50px)",
+          "--box-left": `calc(100% + ${gap}px)`,
           "--transform-top": "-50%",
           "--arrow-before-top": "10%",
           "--arrow-before-right": "100%",
@@ -76,9 +77,8 @@ export const Box: React.FC<Props> = ({ children, placement }) => {
         break;
       case "bottom":
         position = {
-          "--box-top": `calc(100% + 50px)`,
+          "--box-top": `calc(100% + ${gap}px)`,
           "--box-left": "calc(50% - 150px)",
-
           "--arrow-before-bottom": "100%",
           "--arrow-before-right": "10%",
           "--arrow-after-bottom": "calc(100% - 2px)",
@@ -89,9 +89,8 @@ export const Box: React.FC<Props> = ({ children, placement }) => {
       case "left":
         position = {
           "--box-top": `50%`,
-          "--box-right": "calc(100% + 50px)",
+          "--box-right": `calc(100% + ${gap}px)`,
           "--transform-top": "-50%",
-
           "--arrow-before-bottom": "10%",
           "--arrow-before-left": "100%",
           "--arrow-after-bottom": "calc(10% + 1px)",
@@ -100,7 +99,7 @@ export const Box: React.FC<Props> = ({ children, placement }) => {
         };
         break;
       default:
-        position = { "--box-bottom": `calc(100% + 50px)`, "--box-left": "calc(50% - 150px)" };
+        position = { "--box-bottom": `calc(100% + ${gap}px)`, "--box-left": "calc(50% - 150px)" };
         break;
     }
 

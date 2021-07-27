@@ -6,6 +6,7 @@ export type FukidashiProps = {
   trigger?: ActionType | ActionType[];
   placement?: PlacementType;
   width?: number;
+  gap?: number;
   delay?: number;
   onSpeechingDone?: Function;
 };

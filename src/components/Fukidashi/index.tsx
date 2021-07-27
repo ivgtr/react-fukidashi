@@ -17,6 +17,7 @@ export const Fukidashi: React.FC<FukidashiProps> = ({
   text,
   placement = "top",
   width = 300,
+  gap = 50,
   delay = 1000,
   onSpeechingDone = () => {},
 }) => {
@@ -27,7 +28,7 @@ export const Fukidashi: React.FC<FukidashiProps> = ({
   return (
     <div className={styles.Fukidashi}>
       {children}
-      <Box placement={placement} width={width}>
+      <Box placement={placement} width={width} gap={gap}>
         <Speech text={conversionText} delay={delay} onSpeechingDone={onSpeechingDone} />
       </Box>
     </div>
