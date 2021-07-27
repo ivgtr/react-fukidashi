@@ -15,7 +15,7 @@ const styles = {
     right: var(--box-right, auto);
     bottom: var(--box-bottom, auto);
     left: var(--box-left, auto);
-    width: 300px;
+    width: var(--box-width, 300px);
     background-color: #fff;
     border: 2px solid #444;
     border-radius: 5px;
@@ -56,7 +56,7 @@ export const Box: React.FC<Props> = ({ children, placement, width, gap }) => {
       case "top":
         position = {
           "--box-bottom": `calc(100% + ${gap}px)`,
-          "--box-left": "calc(50% - 150px)",
+          "--box-left": `calc(50% - ${width / 2}px)`,
           "--arrow-before-top": "100%",
           "--arrow-before-left": "10%",
           "--arrow-after-top": "calc(100% - 2px)",
@@ -78,7 +78,7 @@ export const Box: React.FC<Props> = ({ children, placement, width, gap }) => {
       case "bottom":
         position = {
           "--box-top": `calc(100% + ${gap}px)`,
-          "--box-left": "calc(50% - 150px)",
+          "--box-left": `calc(50% - ${width / 2}px)`,
           "--arrow-before-bottom": "100%",
           "--arrow-before-right": "10%",
           "--arrow-after-bottom": "calc(100% - 2px)",
@@ -99,12 +99,15 @@ export const Box: React.FC<Props> = ({ children, placement, width, gap }) => {
         };
         break;
       default:
-        position = { "--box-bottom": `calc(100% + ${gap}px)`, "--box-left": "calc(50% - 150px)" };
+        position = {
+          "--box-bottom": `calc(100% + ${gap}px)`,
+          "--box-left": `calc(50% - ${width / 2}px)`,
+        };
         break;
     }
 
-    return position as React.CSSProperties;
-  }, [placement]);
+    return { ...position, "--box-width": `${width}px` } as React.CSSProperties;
+  }, [width, gap, placement]);
 
   return (
     <div className={styles.box} style={setPosition}>

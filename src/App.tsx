@@ -12,9 +12,15 @@ const App = () => {
         justifyContent: "center",
       }}
     >
-      <Fukidashi text={"くぅ～疲れましたw これにて完結です！"} placement={"top"} gap={120}>
+      <Fukidashi
+        text={"くぅ～疲れましたw これにて完結です！"}
+        placement={"top"}
+        gap={120}
+        width={150}
+      >
         <Fukidashi
-          text={`まどか「みんな、見てくれてありがとうちょっと腹黒なところも見えちゃったけど・・・気にしないでね！」
+          text={`まどか「みんな、見てくれてありがとう
+                ちょっと腹黒なところも見えちゃったけど・・・気にしないでね！」
 
                 さやか「いやーありがと！私のかわいさは二十分に伝わったかな？」
 
@@ -33,6 +39,7 @@ const App = () => {
             ]}
             placement={"bottom"}
             gap={150}
+            width={400}
           >
             <div style={{ textAlign: "center" }}>
               <div
