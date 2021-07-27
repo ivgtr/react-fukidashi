@@ -1,10 +1,14 @@
 import { css } from "@linaria/core";
-import React from "react";
-import { FukidashiProps } from "../../../types";
-import { SpeachText } from "./SpeachText";
+import React, { useMemo } from "react";
+import { PlacementType } from "../../types";
+
+type Props = {
+  placement: PlacementType;
+  width: number;
+};
 
 const styles = {
-  fukidashiBox: css`
+  box: css`
     position: absolute;
     top: var(--box-top, auto);
     right: var(--box-right, auto);
@@ -15,7 +19,6 @@ const styles = {
     border: 2px solid #444;
     border-radius: 5px;
     transform: translateY(var(--transform-top, 0));
-
     &::before {
       position: absolute;
       top: var(--arrow-before-top, auto);
@@ -29,7 +32,6 @@ const styles = {
       background-color: #444;
       transform: rotate(var(--transform-rotate, 0));
     }
-
     &::after {
       position: absolute;
       top: var(--arrow-after-top, auto);
@@ -44,13 +46,10 @@ const styles = {
       transform: rotate(var(--transform-rotate, 0deg));
     }
   `,
-  fukidashiText: css`
-    padding: 10px 0;
-  `,
 };
 
-export const FukidashiCore: React.FC<FukidashiProps> = ({ text, placement }) => {
-  const setPosition = React.useCallback(() => {
+export const Box: React.FC<Props> = ({ children, placement }) => {
+  const setPosition = useMemo(() => {
     let position = {};
     switch (placement) {
       case "top":
@@ -102,36 +101,15 @@ export const FukidashiCore: React.FC<FukidashiProps> = ({ text, placement }) => 
         break;
       default:
         position = { "--box-bottom": `calc(100% + 50px)`, "--box-left": "calc(50% - 150px)" };
+        break;
     }
 
     return position as React.CSSProperties;
   }, [placement]);
+
   return (
-    <div className={styles.fukidashiBox} style={setPosition()}>
-      <div>
-        <p style={{ padding: "10px", visibility: "hidden" }}>
-          {(typeof text === "string" ? [text] : [...text]).map((value, key) => {
-            return (
-              <React.Fragment key={key}>
-                <span className={styles.fukidashiText}>{value}</span>
-                <br />
-              </React.Fragment>
-            );
-          })}
-        </p>
-      </div>
-      <div style={{ position: "absolute", top: "0", left: "0" }}>
-        <p style={{ padding: "10px" }}>
-          {(typeof text === "string" ? [text] : [...text]).map((value, key) => {
-            return (
-              <React.Fragment key={key}>
-                <SpeachText text={value} />
-                <br />
-              </React.Fragment>
-            );
-          })}
-        </p>
-      </div>
+    <div className={styles.box} style={setPosition}>
+      {children}
     </div>
   );
 };
