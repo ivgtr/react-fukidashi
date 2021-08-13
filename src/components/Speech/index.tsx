@@ -12,10 +12,10 @@ const styles = {
   `,
   text: css`
     padding: 10px 0;
-    color: #444;
   `,
   wrapper: css`
     padding: 10px;
+    color: #222;
   `,
 };
 
@@ -41,7 +41,7 @@ export const Speech: React.VFC<Props> = ({ text, onSpeechingDone, delay }) => {
             {text.map((value) => {
               return (
                 <React.Fragment key={`key-${Math.random() + Math.random()}`}>
-                  <span className={styles.text}>{value}</span>
+                  <span>{value}</span>
                   <Delay ms={delay} />
                 </React.Fragment>
               );

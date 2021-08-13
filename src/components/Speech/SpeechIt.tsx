@@ -1,8 +1,15 @@
+import { css } from "@linaria/core";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 type Props = {
   text: string;
   delay: number;
+};
+
+const styles = {
+  text: css`
+    padding: 10px 0;
+  `,
 };
 
 export const SpeechIt: React.VFC<Props> = ({ text, delay }) => {
@@ -25,5 +32,5 @@ export const SpeechIt: React.VFC<Props> = ({ text, delay }) => {
     return () => clearTimeout(refTimer.current);
   }, [handleSpeech, delay]);
 
-  return <span>{speech}</span>;
+  return <span className={styles.text}>{speech}</span>;
 };
