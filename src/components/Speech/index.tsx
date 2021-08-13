@@ -12,6 +12,7 @@ const styles = {
   `,
   text: css`
     padding: 10px 0;
+    color: #444;
   `,
   wrapper: css`
     padding: 10px;
