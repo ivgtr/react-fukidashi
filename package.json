@@ -32,7 +32,7 @@
   "scripts": {
     "dev": "vite",
     "prebuild": "node -e 'fs.rmSync(`dist`, {recursive:true, force:true})'",
-    "prebuild:docs": "node -e 'fs.rmSync(`dist`, {recursive:true, force:true})'",
+    "prebuild:docs": "node -e 'fs.rmSync(`docs`, {recursive:true, force:true})'",
     "build": "vite build && tsc --emitDeclarationOnly",
     "build:docs": "vite build -c vite.docs.config.ts",
     "format": "prettier -w \"./src/**/*.{js,jsx,ts,tsx,css}\"",

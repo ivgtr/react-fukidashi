@@ -5,7 +5,7 @@ import vitePluginLinaria from "vite-plugin-linaria";
 const config = defineConfig({
   base: "",
   build: {
-    outDir: "dist",
+    outDir: "docs",
   },
   plugins: [reactPlugin(), vitePluginLinaria()],
 });

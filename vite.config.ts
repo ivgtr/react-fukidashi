@@ -9,7 +9,7 @@ const config = defineConfig({
       entry: "./src/index.ts",
       name: "react-fukidashi",
     },
-    outDir: "lib",
+    outDir: "dist",
     rollupOptions: {
       external: [...Object.keys(packageJson.peerDependencies)],
     },
