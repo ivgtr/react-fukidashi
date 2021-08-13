@@ -20,6 +20,15 @@
     "component"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ivgtr/react-fukidashi.git"
+  },
+  "author": "ivgtr <ivgtr.me@gmail.com> (https://github.com/ivgtr)",
+  "bugs": {
+    "url": "https://github.com/ivgtr/react-fukidashi/issues"
+  },
+  "homepage": "https://github.com/ivgtr/react-fukidashi#readme",
   "scripts": {
     "dev": "vite",
     "prebuild": "node -e 'fs.rmSync(`dist`, {recursive:true, force:true})'",
