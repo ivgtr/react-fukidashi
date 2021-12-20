@@ -43,7 +43,7 @@
     "@linaria/core": "3.0.0-beta.15",
     "@linaria/react": "3.0.0-beta.15",
     "@linaria/shaker": "3.0.0-beta.15",
-    "@types/node": "16.11.12",
+    "@types/node": "16.11.14",
     "@types/react": "17.0.37",
     "@types/react-dom": "17.0.11",
     "@typescript-eslint/eslint-plugin": "5.7.0",
