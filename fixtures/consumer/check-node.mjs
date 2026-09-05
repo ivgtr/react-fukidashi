@@ -30,6 +30,6 @@ for (const entry of [esm, cjs]) {
 }
 assert.match(
   readFileSync(require.resolve('react-fukidashi/style.css'), 'utf8'),
-  /fukidashi-character/,
+  /fukidashi-unrevealed/,
 );
 console.log(`Isolated ESM/CJS, SSR and CSS resolution passed for ${pkg.name}@${pkg.version}`);

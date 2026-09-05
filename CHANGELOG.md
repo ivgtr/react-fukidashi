@@ -2,8 +2,8 @@
 
 ## 2.0.0 — unreleased
 
-- Fix typewriter word wrapping: lay out the complete text once and reveal graphemes without moving already-visible characters.
-- Preserve native text shaping, selection of revealed text, accessible full text and the growing-layout opt-out.
+- Fix typewriter word wrapping: keep one native text node and reveal grapheme ranges with CSS Custom Highlights, preserving wrapping, kerning and ligatures.
+- Preserve native text shaping, full-message selection during playback, accessible full text and the growing-layout opt-out. Browsers without Custom Highlights receive complete text instead of unstable animation.
 - Run browser regressions and installed production-app smoke checks in Chromium, Firefox and WebKit.
 - Install actual npm tarballs in isolated React 18/19 consumers; check ESM/CJS, SSR, Bundler/NodeNext types, CSS and production builds.
 - Include API.md in the package, restore the normal installation command and prepare stable release metadata.

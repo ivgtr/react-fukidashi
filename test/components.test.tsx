@@ -39,8 +39,8 @@ describe('composable surfaces', () => {
     const { container } = render(<Typewriter ref={ref} text="Hello 👋" cursor="▍" />);
     expect(container.querySelector('.fukidashi-sr-only')?.textContent).toBe('Hello 👋');
     expect(container.querySelector('.fukidashi-typewriter-space')).toBeNull();
-    expect(container.querySelectorAll('.fukidashi-character')).toHaveLength(7);
-    expect(container.querySelectorAll('.fukidashi-character[data-visible="true"]')).toHaveLength(0);
+    expect(container.querySelector('.fukidashi-typewriter-visible')?.childNodes.length).toBe(1);
+    expect(container.firstElementChild?.getAttribute('data-visible-length')).toBe('0');
     expect(
       container.querySelector('.fukidashi-typewriter-visible')?.getAttribute('aria-hidden'),
     ).toBe('true');

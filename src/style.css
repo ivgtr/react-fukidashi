@@ -133,8 +133,15 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.fukidashi-character[data-visible='false'] {
+.fukidashi-typewriter[data-reserve-space='true']:not([data-status='complete'])
+  > .fukidashi-typewriter-visible:not([data-reveal-ready]) {
   visibility: hidden;
+}
+::highlight(fukidashi-unrevealed) {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke-width: 0;
+  text-shadow: none;
 }
 .fukidashi-cursor[data-overlay='true'] {
   position: absolute;

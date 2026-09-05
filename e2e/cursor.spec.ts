@@ -11,9 +11,17 @@ for (const dir of ['ltr', 'rtl']) {
     await expect(cursor).toHaveCSS('visibility', 'visible');
     const aligned = () =>
       typing.evaluate((root) => {
-        const target = root.querySelector<HTMLElement>('[data-visible="false"]')!;
+        const target = root.querySelector<HTMLElement>('.fukidashi-typewriter-visible')!;
+        const node = target.firstChild!;
+        const offset = Number(root.getAttribute('data-visible-length'));
+        const next = [
+          ...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(node.textContent!),
+        ].find(({ index }) => index === offset)!;
+        const range = document.createRange();
+        range.setStart(node, offset);
+        range.setEnd(node, offset + next.segment.length);
         const caret = root.querySelector<HTMLElement>('[data-overlay]')!;
-        const a = target.getBoundingClientRect();
+        const a = range.getBoundingClientRect();
         const b = caret.getBoundingClientRect();
         const rtl = getComputedStyle(target).direction === 'rtl';
         return Math.max(Math.abs(b.x - (rtl ? a.right : a.left)), Math.abs(b.y - a.y));
@@ -23,7 +31,7 @@ for (const dir of ['ltr', 'rtl']) {
     await expect(typing).toHaveAttribute('data-status', 'typing');
     for (let count = 1; count <= 8; count++) {
       await page.clock.runFor(25);
-      await expect(typing.locator('[data-visible="true"]')).toHaveCount(count);
+      await expect(typing).toHaveAttribute('data-visible-length', String(count));
     }
     await page.getByRole('button', { name: 'Pause', exact: true }).dispatchEvent('click');
     await expect(typing).toHaveAttribute('data-status', 'paused');
@@ -33,7 +41,7 @@ for (const dir of ['ltr', 'rtl']) {
     });
     await page.clock.runFor(100);
     await expect.poll(aligned).toBeLessThan(1.1);
-    await expect(typing.locator('[data-visible="true"]')).toHaveCount(8);
+    await expect(typing).toHaveAttribute('data-visible-length', '8');
     await page.getByRole('button', { name: 'Skip', exact: true }).dispatchEvent('click');
     await expect(cursor).toHaveCount(0);
     await expect(page.getByLabel('Completions')).toHaveText('1');

@@ -1,13 +1,22 @@
 import { expect, test, type Page } from '@playwright/test';
 
-async function positions(page: Page) {
-  return page.getByTestId('typing').evaluate((root) => {
+async function positions(page: Page, testId = 'typing') {
+  return page.getByTestId(testId).evaluate((root) => {
+    const node = root.querySelector('.fukidashi-typewriter-visible')!.firstChild!;
     const origin = root.getBoundingClientRect();
-    return [...root.querySelectorAll('.fukidashi-character')].map((span) => {
+    return [
+      ...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(node.textContent!),
+    ].map(({ index, segment }) => {
       const range = document.createRange();
-      range.selectNodeContents(span.firstChild!);
+      range.setStart(node, index);
+      range.setEnd(node, index + segment.length);
       const rect = range.getBoundingClientRect();
-      return { x: rect.x - origin.x, y: rect.y - origin.y, width: rect.width };
+      return {
+        x: rect.x - origin.x,
+        y: rect.y - origin.y,
+        width: rect.width,
+        end: index + segment.length,
+      };
     });
   });
 }
@@ -39,93 +48,61 @@ const cases = [
 ];
 
 for (const sample of cases) {
-  test(`keeps every revealed character in its final position: ${sample.name}`, async ({ page }) => {
+  test(`keeps every revealed character in its native final position: ${sample.name}`, async ({
+    page,
+  }, info) => {
     await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
     await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
     await page.goto(
-      `/typewriter.html?${new URLSearchParams({
-        text: sample.text,
-        width: String(sample.width),
-        lang: sample.lang ?? 'en',
-        dir: sample.dir ?? 'ltr',
-      })}`,
+      `/typewriter.html?${new URLSearchParams({ text: sample.text, width: String(sample.width), lang: sample.lang ?? 'en', dir: sample.dir ?? 'ltr' })}`,
     );
     const typing = page.getByTestId('typing');
     await expect(typing).toHaveAttribute('data-status', 'paused');
+    await expect(typing.locator('.fukidashi-typewriter-visible')).toHaveAttribute(
+      'data-reveal-ready',
+      '',
+    );
     const baseline = await positions(page);
-    expect(baseline.length).toBeGreaterThan(0);
+    const reference = await positions(page, 'reference');
     const before = await typing.boundingBox();
+    expect(baseline).toHaveLength(reference.length);
     await page.getByRole('button', { name: 'Start', exact: true }).dispatchEvent('click');
     await expect(typing).toHaveAttribute('data-status', 'typing');
     for (let count = 1; count <= baseline.length; count++) {
       await page.clock.runFor(25);
-      await expect(typing.locator('[data-visible="true"]')).toHaveCount(count);
+      const end = baseline[count - 1]!.end;
+      await expect(typing).toHaveAttribute('data-visible-length', String(end));
       const current = await positions(page);
       for (let index = 0; index < count; index++) {
-        expect(
-          Math.abs(current[index]!.x - baseline[index]!.x),
-          `x at ${count}/${index}`,
-        ).toBeLessThan(0.6);
-        expect(
-          Math.abs(current[index]!.y - baseline[index]!.y),
-          `y at ${count}/${index}`,
-        ).toBeLessThan(0.6);
+        // Same text node throughout playback, including kerning and ligatures.
+        expect(Math.abs(current[index]!.x - baseline[index]!.x)).toBeLessThan(0.6);
+        expect(Math.abs(current[index]!.y - baseline[index]!.y)).toBeLessThan(0.6);
+        expect(Math.abs(current[index]!.x - reference[index]!.x)).toBeLessThan(0.6);
+        expect(Math.abs(current[index]!.y - reference[index]!.y)).toBeLessThan(0.6);
+        expect(Math.abs(current[index]!.width - reference[index]!.width)).toBeLessThan(0.6);
+      }
+      if (count < baseline.length) {
+        const hidden = await typing.evaluate((root) => {
+          const node = root.querySelector('.fukidashi-typewriter-visible')!.firstChild;
+          const range = [...CSS.highlights.get('fukidashi-unrevealed')!].find(
+            (range) => range.startContainer === node,
+          ) as Range;
+          return range.toString();
+        });
+        expect(hidden).toBe(sample.text.slice(end));
+      }
+      if (count === 12 && sample.name === 'English words') {
+        await page.screenshot({ path: info.outputPath('typewriter-midplay.png') });
       }
     }
     await expect(typing).toHaveAttribute('data-status', 'complete');
     await expect(page.getByLabel('Completions')).toHaveText('1');
     expect(Math.abs((await typing.boundingBox())!.height - before!.height)).toBeLessThan(0.6);
-    // Compare whole words with ordinary text. A per-letter Range can include
-    // an entire ligature in a split text node but only half in a single node.
-    // The enclosing bounds of split text fragments can differ from one text
-    // node by up to 2 CSS px (edge rounding / ligature bounds in WebKit).
-    // This cross-DOM comparison does NOT relax the 0.6px playback check above.
-    const words = await page.evaluate(() => {
-      const root = document.querySelector('[data-testid="typing"]')!;
-      const reference = document.querySelector('[data-testid="reference"]')!;
-      const plain = reference.querySelector('.fukidashi-typewriter-visible')!.firstChild!;
-      const origin = root.getBoundingClientRect();
-      const refOrigin = reference.getBoundingClientRect();
-      const nodes = [...root.querySelectorAll('.fukidashi-character')].map((el) => el.firstChild!);
-      const locate = (offset: number, end = false) => {
-        for (const node of nodes) {
-          if (offset < node.textContent!.length || (end && offset === node.textContent!.length))
-            return { node, offset };
-          offset -= node.textContent!.length;
-        }
-        const node = nodes[nodes.length - 1]!;
-        return { node, offset: node.textContent!.length };
-      };
-      return [...new Intl.Segmenter(undefined, { granularity: 'word' }).segment(plain.textContent!)]
-        .filter(({ segment }) => segment.trim())
-        .map(({ index, segment }) => {
-          const start = locate(index);
-          const end = locate(index + segment.length, true);
-          const actual = document.createRange();
-          actual.setStart(start.node, start.offset);
-          actual.setEnd(end.node, end.offset);
-          const expected = document.createRange();
-          expected.setStart(plain, index);
-          expected.setEnd(plain, index + segment.length);
-          const a = actual.getBoundingClientRect();
-          const b = expected.getBoundingClientRect();
-          return {
-            segment,
-            x: a.x - origin.x - b.x + refOrigin.x,
-            y: a.y - origin.y - b.y + refOrigin.y,
-            width: a.width - b.width,
-          };
-        });
-    });
-    for (const word of words) {
-      expect(Math.abs(word.x), word.segment).toBeLessThanOrEqual(2);
-      expect(Math.abs(word.y), word.segment).toBeLessThanOrEqual(2);
-      expect(Math.abs(word.width), word.segment).toBeLessThanOrEqual(2);
-    }
+    expect(await page.evaluate(() => CSS.highlights.has('fukidashi-unrevealed'))).toBe(false);
   });
 }
 
-test('selection contains only revealed text, with no hidden text or cursor duplicates', async ({
+test('full message is selectable once during playback and exposed once to assistive technology', async ({
   page,
 }) => {
   const text = 'Copy this text safely.';
@@ -138,7 +115,7 @@ test('selection contains only revealed text, with no hidden text or cursor dupli
   await expect(typing).toHaveAttribute('data-status', 'typing');
   for (let count = 1; count <= 4; count++) {
     await page.clock.runFor(25);
-    await expect(typing.locator('[data-visible="true"]')).toHaveCount(count);
+    await expect(typing).toHaveAttribute('data-visible-length', String(count));
   }
   const selectText = () =>
     typing.evaluate((root) => {
@@ -147,7 +124,7 @@ test('selection contains only revealed text, with no hidden text or cursor dupli
       selection.selectAllChildren(root);
       return selection.toString();
     });
-  expect(await selectText()).toBe('Copy');
+  expect(await selectText()).toBe(text);
   await expect(typing).toMatchAriaSnapshot(`- text: ${text}`);
   await page.getByRole('button', { name: 'Skip', exact: true }).dispatchEvent('click');
   await expect(typing).toHaveAttribute('data-status', 'complete');
@@ -163,4 +140,14 @@ test('reserveSpace=false explicitly opts into growing layout', async ({ page }) 
   await page.getByRole('button', { name: 'Skip', exact: true }).click();
   await expect(typing).toHaveAttribute('data-status', 'complete');
   expect((await typing.boundingBox())!.height).toBeGreaterThan(before!.height);
+});
+
+test('unsupported highlights fall back to complete text without leaving it invisible', async ({
+  page,
+}) => {
+  await page.addInitScript(() => Object.defineProperty(window, 'Highlight', { value: undefined }));
+  await page.goto('/typewriter.html');
+  await expect(page.getByTestId('typing')).toHaveAttribute('data-status', 'complete');
+  await expect(page.getByTestId('typing').locator('.fukidashi-typewriter-visible')).toBeVisible();
+  await expect(page.getByLabel('Completions')).toHaveText('1');
 });
