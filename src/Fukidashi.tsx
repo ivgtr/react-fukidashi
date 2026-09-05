@@ -102,7 +102,7 @@ export const Fukidashi = forwardRef<HTMLDivElement, FukidashiProps>(function Fuk
       element.style.removeProperty('--fukidashi-available-width');
       element.style.removeProperty('--fukidashi-available-height');
     }
-  }, [open, present, avoidCollisions, refs.floating, body]);
+  }, [open, present, avoidCollisions, refs.floating, body, portal]);
 
   const side = resolvedPlacement.split('-')[0] as Side;
   const arrowOffset =
