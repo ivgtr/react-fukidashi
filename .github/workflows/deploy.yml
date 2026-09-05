@@ -2,28 +2,25 @@ name: Deploy to gh-pages
 on:
   push:
     branches: [main]
-
+permissions:
+  contents: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
 jobs:
-  publish:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v2
+      - uses: actions/checkout@v4
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - uses: actions/setup-node@v2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
         with:
-          node-version: 14
-      - name: Build
-        run: |
-          npm ci
-          npm run build:docs
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
-          force_orphan: true
