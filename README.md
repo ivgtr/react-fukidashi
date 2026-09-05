@@ -8,13 +8,13 @@ v2は全面的な再設計です。見た目・配置・文字送りを分離し
 
 ## 構成
 
-| API | 用途 |
-| --- | --- |
-| `Bubble` | 通常のレイアウトで使う吹き出し。チャット、会話ログ、カードなど |
-| `Fukidashi` | アンカーに追従する吹き出し。12方向、衝突回避、Portal、入退場アニメーション |
-| `Typewriter` | 独立した文字送り。日本語・結合文字・絵文字、停止・再開・スキップ・リセット |
-| `useTypewriter` | 描画を完全に自作したい場合のヘッドレスな文字送りフック |
-| `useReducedMotion` | OSの動きを減らす設定を参照するフック |
+| API                | 用途                                                                       |
+| ------------------ | -------------------------------------------------------------------------- |
+| `Bubble`           | 通常のレイアウトで使う吹き出し。チャット、会話ログ、カードなど             |
+| `Fukidashi`        | アンカーに追従する吹き出し。12方向、衝突回避、Portal、入退場アニメーション |
+| `Typewriter`       | 独立した文字送り。日本語・結合文字・絵文字、停止・再開・スキップ・リセット |
+| `useTypewriter`    | 描画を完全に自作したい場合のヘッドレスな文字送りフック                     |
+| `useReducedMotion` | OSの動きを減らす設定を参照するフック                                       |
 
 React / React DOM 18.3.1または19を使用します。CSSは明示的に読み込み、アニメーションエンジンやCSS-in-JSランタイムは不要です。位置計算には `@floating-ui/react-dom` を使用します。
 
@@ -130,7 +130,9 @@ function CustomText() {
         <span aria-hidden="true">{typing.visibleText}</span>
       </p>
       <progress value={typing.progress} max={1} />
-      <button onClick={typing.skip} disabled={typing.isComplete}>スキップ</button>
+      <button onClick={typing.skip} disabled={typing.isComplete}>
+        スキップ
+      </button>
     </div>
   );
 }
@@ -142,14 +144,14 @@ function CustomText() {
 
 ### Bubble
 
-| Prop | 既定 | 説明 |
-| --- | --- | --- |
-| `variant` | `soft` | `soft` / `dark` / `comic` |
-| `tail` | `true` | `false`で非表示。または `{ side, size, offset }` |
-| `tail.side` | `bottom` | 吹き出し本体のどの辺からしっぽを出すか |
-| `tail.size` | `12` | しっぽの正方形の一辺、px。0で非表示 |
-| `tail.offset` | `50%` | 辺に沿ったしっぽの中心位置。numberはpx、stringはCSS長さ |
-| `contentClassName`, `contentStyle` | — | 本文のスクロール領域を調整 |
+| Prop                               | 既定     | 説明                                                    |
+| ---------------------------------- | -------- | ------------------------------------------------------- |
+| `variant`                          | `soft`   | `soft` / `dark` / `comic`                               |
+| `tail`                             | `true`   | `false`で非表示。または `{ side, size, offset }`        |
+| `tail.side`                        | `bottom` | 吹き出し本体のどの辺からしっぽを出すか                  |
+| `tail.size`                        | `12`     | しっぽの正方形の一辺、px。0で非表示                     |
+| `tail.offset`                      | `50%`    | 辺に沿ったしっぽの中心位置。numberはpx、stringはCSS長さ |
+| `contentClassName`, `contentStyle` | —        | 本文のスクロール領域を調整                              |
 
 通常のdivのHTML属性、`children`, `className`, `style`, `ref` を受け付けます。
 
@@ -157,43 +159,43 @@ function CustomText() {
 
 Bubbleのprops（`tailRef`を除く）に加えて以下を使用できます。`children` は吹き出しの**中身**です。
 
-| Prop | 既定 | 説明 |
-| --- | --- | --- |
-| `anchor` | 必須 | ReactNodeまたは `(props) => ReactNode`。render関数は `aria-describedby` を渡せる |
-| `open` | `true` | 表示状態。閉じるアニメーション後に本文をアンマウント |
-| `placement` | `top` | top / right / bottom / left と各 `-start`, `-end` |
-| `gap` | `10` | アンカーとしっぽ先端の間隔、px |
-| `tail` | `true` | falseまたは `{ size }`。辺・位置は自動計算 |
-| `portal` | `true` | document.bodyに配置。falseでインライン、HTMLElementで任意の配置先 |
-| `strategy` | `fixed` | `fixed` / `absolute` |
-| `avoidCollisions` | `true` | flip / shift / 利用可能領域に合わせたサイズ制限 |
-| `collisionPadding` | `12` | 衝突判定の余白、px |
-| `trackAnchor` | `false` | transformで動くアンカーに毎フレーム追従。必要な場合だけ有効化 |
-| `motion` | `pop` | pop / fade / slide / none |
-| `duration` | `180` | 入退場の時間、ms |
-| `reducedMotion` | `system` | system / always / never |
-| `zIndex` | `1000` | 配置用要素の重なり順 |
-| `anchorClassName`, `anchorStyle` | — | アンカーを囲むinline-flexのspan |
-| `onExitComplete` | — | 閉じ終わったときだけ実行。途中で再表示したら取り消し |
-| `role` | `note` | 文脈に応じて変更。インタラクティブな本文にtooltipを指定しない |
+| Prop                             | 既定     | 説明                                                                             |
+| -------------------------------- | -------- | -------------------------------------------------------------------------------- |
+| `anchor`                         | 必須     | ReactNodeまたは `(props) => ReactNode`。render関数は `aria-describedby` を渡せる |
+| `open`                           | `true`   | 表示状態。閉じるアニメーション後に本文をアンマウント                             |
+| `placement`                      | `top`    | top / right / bottom / left と各 `-start`, `-end`                                |
+| `gap`                            | `10`     | アンカーとしっぽ先端の間隔、px                                                   |
+| `tail`                           | `true`   | falseまたは `{ size }`。辺・位置は自動計算                                       |
+| `portal`                         | `true`   | document.bodyに配置。falseでインライン、HTMLElementで任意の配置先                |
+| `strategy`                       | `fixed`  | `fixed` / `absolute`                                                             |
+| `avoidCollisions`                | `true`   | flip / shift / 利用可能領域に合わせたサイズ制限                                  |
+| `collisionPadding`               | `12`     | 衝突判定の余白、px                                                               |
+| `trackAnchor`                    | `false`  | transformで動くアンカーに毎フレーム追従。必要な場合だけ有効化                    |
+| `motion`                         | `pop`    | pop / fade / slide / none                                                        |
+| `duration`                       | `180`    | 入退場の時間、ms                                                                 |
+| `reducedMotion`                  | `system` | system / always / never                                                          |
+| `zIndex`                         | `1000`   | 配置用要素の重なり順                                                             |
+| `anchorClassName`, `anchorStyle` | —        | アンカーを囲むinline-flexのspan                                                  |
+| `onExitComplete`                 | —        | 閉じ終わったときだけ実行。途中で再表示したら取り消し                             |
+| `role`                           | `note`   | 文脈に応じて変更。インタラクティブな本文にtooltipを指定しない                    |
 
 画面や祖先スクロール、要素のリサイズ、レイアウト変更を追跡します。利用できる高さを超える本文はスクロールします。`portal={false}` や独自のPortal先では、その配置先のoverflow・transform・積層コンテキストが影響します。アンカーはinline-flexのspanで囲まれるため、tableや特殊なレイアウトには適切なラッパーを用意してください。
 
 ### Typewriter / useTypewriter
 
-| Prop | 既定 | 説明 |
-| --- | --- | --- |
-| `text` | 必須 | string / readonly string[]。配列の要素間は改行 |
-| `speed` | `35` | 書記素ごとの待ち時間、ms。0で即時表示 |
-| `startDelay` | `0` | 最初の文字の前に追加する時間 |
-| `lineDelay` | `250` | 改行の後に追加する時間 |
-| `punctuationDelay` | `140` | 句読点の後に追加する時間 |
-| `paused` | `false` | アプリ側で一時停止 |
-| `disabled` | `false` | 文字送りを無効にして全文を表示 |
-| `reducedMotion` | `system` | system / always / never |
-| `onComplete` | — | その再生の全文表示完了通知 |
-| `cursor` | なし | Typewriterのみ。例：`"▍"` |
-| `reserveSpace` | `true` | Typewriterのみ。全文相当の領域を確保してレイアウトの跳ねを防ぐ |
+| Prop               | 既定     | 説明                                                           |
+| ------------------ | -------- | -------------------------------------------------------------- |
+| `text`             | 必須     | string / readonly string[]。配列の要素間は改行                 |
+| `speed`            | `35`     | 書記素ごとの待ち時間、ms。0で即時表示                          |
+| `startDelay`       | `0`      | 最初の文字の前に追加する時間                                   |
+| `lineDelay`        | `250`    | 改行の後に追加する時間                                         |
+| `punctuationDelay` | `140`    | 句読点の後に追加する時間                                       |
+| `paused`           | `false`  | アプリ側で一時停止                                             |
+| `disabled`         | `false`  | 文字送りを無効にして全文を表示                                 |
+| `reducedMotion`    | `system` | system / always / never                                        |
+| `onComplete`       | —        | その再生の全文表示完了通知                                     |
+| `cursor`           | なし     | Typewriterのみ。例：`"▍"`                                      |
+| `reserveSpace`     | `true`   | Typewriterのみ。全文相当の領域を確保してレイアウトの跳ねを防ぐ |
 
 `Typewriter` はspanのHTML属性も受け付けます。refはDOMではなく `TypewriterControls` です。最初の文字は `startDelay + speed` 後に表示します。負の時間は0、NaN・Infinityは既定値として扱います。
 

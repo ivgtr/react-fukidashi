@@ -8,21 +8,45 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-      "require": { "types": "./dist/cjs/index.d.ts", "default": "./dist/cjs/index.js" }
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
     },
     "./style.css": "./dist/style.css",
     "./package.json": "./package.json"
   },
-  "files": ["dist", "MIGRATION.md"],
-  "sideEffects": ["**/*.css"],
-  "keywords": ["react", "speech-bubble", "typewriter", "balloon", "fukidashi"],
+  "files": [
+    "dist",
+    "MIGRATION.md"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "keywords": [
+    "react",
+    "speech-bubble",
+    "typewriter",
+    "balloon",
+    "fukidashi"
+  ],
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/ivgtr/react-fukidashi.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ivgtr/react-fukidashi.git"
+  },
   "author": "ivgtr <ivgtr.me@gmail.com> (https://github.com/ivgtr)",
-  "bugs": { "url": "https://github.com/ivgtr/react-fukidashi/issues" },
+  "bugs": {
+    "url": "https://github.com/ivgtr/react-fukidashi/issues"
+  },
   "homepage": "https://ivgtr.github.io/react-fukidashi/",
-  "engines": { "node": ">=22.12.0" },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "node scripts/build.mjs",
@@ -37,8 +61,13 @@
     "check": "npm run typecheck && npm test && npm run build && npm run test:package && npm run build:docs && npm run format:check",
     "prepack": "npm run build"
   },
-  "dependencies": { "@floating-ui/react-dom": "^2.1.6" },
-  "peerDependencies": { "react": "^18.3.1 || ^19.0.0", "react-dom": "^18.3.1 || ^19.0.0" },
+  "dependencies": {
+    "@floating-ui/react-dom": "^2.1.6"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1 || ^19.0.0",
+    "react-dom": "^18.3.1 || ^19.0.0"
+  },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "@testing-library/react": "^16.3.0",

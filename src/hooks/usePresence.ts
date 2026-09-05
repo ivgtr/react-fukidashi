@@ -8,7 +8,9 @@ export function usePresence(open: boolean, duration: number, onExitComplete?: ()
   const [present, setPresent] = useState(open);
   const [entered, setEntered] = useState(false);
   const callback = useRef(onExitComplete);
-  useEffect(() => { callback.current = onExitComplete; }, [onExitComplete]);
+  useEffect(() => {
+    callback.current = onExitComplete;
+  }, [onExitComplete]);
   useEffect(() => {
     let firstFrame = 0;
     let secondFrame = 0;
@@ -16,15 +18,20 @@ export function usePresence(open: boolean, duration: number, onExitComplete?: ()
     if (open) {
       setPresent(true);
       if (duration === 0) setEntered(true);
-      else firstFrame = requestAnimationFrame(() => {
-        secondFrame = requestAnimationFrame(() => setEntered(true));
-      });
+      else
+        firstFrame = requestAnimationFrame(() => {
+          secondFrame = requestAnimationFrame(() => setEntered(true));
+        });
     } else {
       setEntered(false);
-      if (present) timer = setTimeout(() => {
-        setPresent(false);
-        callback.current?.();
-      }, duration === 0 ? 0 : duration + 32);
+      if (present)
+        timer = setTimeout(
+          () => {
+            setPresent(false);
+            callback.current?.();
+          },
+          duration === 0 ? 0 : duration + 32,
+        );
     }
     return () => {
       cancelAnimationFrame(firstFrame);

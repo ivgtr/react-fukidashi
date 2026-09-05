@@ -5,14 +5,32 @@ import { characterDelay, nonNegative, normalizeText, segmentText } from '../text
 import type { TypewriterOptions, TypewriterResult } from '../types.js';
 import { useReducedMotion } from './useReducedMotion.js';
 
-interface Run { source: string; id: number; count: number; manuallyPaused: boolean }
-interface Wait { source: string; id: number; count: number; duration: number; remaining: number }
+interface Run {
+  source: string;
+  id: number;
+  count: number;
+  manuallyPaused: boolean;
+}
+interface Wait {
+  source: string;
+  id: number;
+  count: number;
+  duration: number;
+  remaining: number;
+}
 
 /** A single cancellable timer. Text identity is based on content, not array or
  * callback identity. Pausing preserves the remaining portion of the interval. */
 export function useTypewriter({
-  text: input, speed = 35, startDelay = 0, lineDelay = 250, punctuationDelay = 140,
-  paused = false, disabled = false, reducedMotion = 'system', onComplete,
+  text: input,
+  speed = 35,
+  startDelay = 0,
+  lineDelay = 250,
+  punctuationDelay = 140,
+  paused = false,
+  disabled = false,
+  reducedMotion = 'system',
+  onComplete,
 }: TypewriterOptions): TypewriterResult {
   const text = normalizeText(input);
   const characters = useMemo(() => segmentText(text), [text]);
@@ -30,7 +48,9 @@ export function useTypewriter({
   const wait = useRef<Wait | null>(null);
   const completeCallback = useRef(onComplete);
   const completed = useRef<{ source: string; id: number } | null>(null);
-  useEffect(() => { completeCallback.current = onComplete; }, [onComplete]);
+  useEffect(() => {
+    completeCallback.current = onComplete;
+  }, [onComplete]);
 
   const count = instant ? characters.length : Math.min(run.count, characters.length);
   const isComplete = count === characters.length;
@@ -39,13 +59,26 @@ export function useTypewriter({
   useEffect(() => {
     if (run.source !== text) return;
     if (instant) {
-      if (run.count !== characters.length) setRun(current => ({ ...current, count: characters.length }));
+      if (run.count !== characters.length)
+        setRun((current) => ({ ...current, count: characters.length }));
       return;
     }
     if (isComplete || isPaused) return;
-    const duration = characterDelay(characters, run.count, interval, initialWait, newlineWait, punctuationWait);
+    const duration = characterDelay(
+      characters,
+      run.count,
+      interval,
+      initialWait,
+      newlineWait,
+      punctuationWait,
+    );
     let pending = wait.current;
-    if (!pending || pending.source !== text || pending.id !== run.id || pending.count !== run.count) {
+    if (
+      !pending ||
+      pending.source !== text ||
+      pending.id !== run.id ||
+      pending.count !== run.count
+    ) {
       pending = { source: text, id: run.id, count: run.count, duration, remaining: duration };
       wait.current = pending;
     } else if (pending.duration !== duration) {
@@ -56,8 +89,11 @@ export function useTypewriter({
     const started = performance.now();
     const timer = setTimeout(() => {
       wait.current = null;
-      setRun(current => current.source === text && current.id === run.id && current.count === run.count
-        ? { ...current, count: current.count + 1 } : current);
+      setRun((current) =>
+        current.source === text && current.id === run.id && current.count === run.count
+          ? { ...current, count: current.count + 1 }
+          : current,
+      );
     }, active.remaining);
     return () => {
       clearTimeout(timer);
@@ -65,8 +101,20 @@ export function useTypewriter({
         active.remaining = Math.max(0, active.remaining - (performance.now() - started));
       }
     };
-  }, [text, characters, run.source, run.id, run.count, instant, isComplete, isPaused,
-    interval, initialWait, newlineWait, punctuationWait]);
+  }, [
+    text,
+    characters,
+    run.source,
+    run.id,
+    run.count,
+    instant,
+    isComplete,
+    isPaused,
+    interval,
+    initialWait,
+    newlineWait,
+    punctuationWait,
+  ]);
 
   useEffect(() => {
     if (run.source !== text || !isComplete) return;
@@ -75,18 +123,29 @@ export function useTypewriter({
     completeCallback.current?.();
   }, [text, run.source, run.id, isComplete]);
 
-  const pause = useCallback(() => setRun(current => ({ ...current, manuallyPaused: true })), []);
-  const resume = useCallback(() => setRun(current => ({ ...current, manuallyPaused: false })), []);
-  const skip = useCallback(() => setRun(current => ({ ...current, count: characters.length })), [characters.length]);
+  const pause = useCallback(() => setRun((current) => ({ ...current, manuallyPaused: true })), []);
+  const resume = useCallback(
+    () => setRun((current) => ({ ...current, manuallyPaused: false })),
+    [],
+  );
+  const skip = useCallback(
+    () => setRun((current) => ({ ...current, count: characters.length })),
+    [characters.length],
+  );
   const reset = useCallback(() => {
     wait.current = null;
-    setRun(current => ({ source: text, id: current.id + 1, count: 0, manuallyPaused: false }));
+    setRun((current) => ({ source: text, id: current.id + 1, count: 0, manuallyPaused: false }));
   }, [text]);
 
   return {
-    text, visibleText: characters.slice(0, count).join(''),
+    text,
+    visibleText: characters.slice(0, count).join(''),
     progress: characters.length === 0 ? 1 : count / characters.length,
     status: isComplete ? 'complete' : isPaused ? 'paused' : 'typing',
-    isComplete, pause, resume, skip, reset,
+    isComplete,
+    pause,
+    resume,
+    skip,
+    reset,
   };
 }

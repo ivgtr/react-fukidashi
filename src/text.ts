@@ -7,8 +7,10 @@ export function normalizeText(text: string | readonly string[]): string {
 export function segmentText(text: string): string[] {
   if (!text) return [];
   if (typeof Intl === 'undefined' || typeof Intl.Segmenter !== 'function') return [text];
-  return Array.from(new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(text),
-    ({ segment }) => segment);
+  return Array.from(
+    new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(text),
+    ({ segment }) => segment,
+  );
 }
 
 export function nonNegative(value: number, fallback: number): number {
@@ -16,10 +18,21 @@ export function nonNegative(value: number, fallback: number): number {
 }
 
 export function characterDelay(
-  characters: readonly string[], index: number, speed: number,
-  startDelay: number, lineDelay: number, punctuationDelay: number,
+  characters: readonly string[],
+  index: number,
+  speed: number,
+  startDelay: number,
+  lineDelay: number,
+  punctuationDelay: number,
 ): number {
   if (index === 0) return startDelay + speed;
   const previous = characters[index - 1];
-  return speed + (previous === '\n' ? lineDelay : /[、。，．！？!?.,;:…]/u.test(previous ?? '') ? punctuationDelay : 0);
+  return (
+    speed +
+    (previous === '\n'
+      ? lineDelay
+      : /[、。，．！？!?.,;:…]/u.test(previous ?? '')
+        ? punctuationDelay
+        : 0)
+  );
 }

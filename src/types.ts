@@ -85,8 +85,8 @@ export interface TypewriterResult extends TypewriterControls {
   isComplete: boolean;
 }
 
-export interface TypewriterProps extends TypewriterOptions,
-  Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
+export interface TypewriterProps
+  extends TypewriterOptions, Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
   cursor?: ReactNode;
   reserveSpace?: boolean;
 }

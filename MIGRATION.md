@@ -15,7 +15,7 @@ v2は破壊的変更を含む再構築です。旧実装を残す互換モード
   onSpeechingDone={onDone}
 >
   <button>Anchor</button>
-</Fukidashi>;
+</Fukidashi>
 ```
 
 ```tsx
@@ -27,7 +27,7 @@ v2は破壊的変更を含む再構築です。旧実装を残す互換モード
   style={{ '--fukidashi-width': '300px' }}
 >
   <Typewriter text={['こんにちは', '次の行']} lineDelay={1000} onComplete={onDone} />
-</Fukidashi>;
+</Fukidashi>
 ```
 
 ```tsx
@@ -35,18 +35,18 @@ import { Fukidashi, Typewriter } from 'react-fukidashi';
 import 'react-fukidashi/style.css'; // CSSの公開パスは維持
 ```
 
-| v1 | v2 |
-| --- | --- |
-| children = アンカー | `anchor` prop。childrenは本文 |
-| textをFukidashiに渡す | `<Typewriter text={...} />` を本文に入れる |
-| width={300} | styleの `--fukidashi-width: '300px'`。CSS長さが利用可能 |
-| delay | Typewriterの `lineDelay`。別途 `speed`, `startDelay`, `punctuationDelay` |
-| onSpeechingDone | Typewriterの `onComplete` |
-| 4方向固定 | 12配置と自動反転・画面内補正 |
-| 常時表示 | `open` で制御、閉じるアニメーション後にアンマウント |
-| 固定色・固定枠 | variant、CSS変数、className、style |
-| React 16 / 17 | React / React DOM 18.3.1または19 |
-| UMD/ESM | ESM/CJS、各型宣言、CSS。UMDのscriptタグ読込は廃止 |
+| v1                    | v2                                                                       |
+| --------------------- | ------------------------------------------------------------------------ |
+| children = アンカー   | `anchor` prop。childrenは本文                                            |
+| textをFukidashiに渡す | `<Typewriter text={...} />` を本文に入れる                               |
+| width={300}           | styleの `--fukidashi-width: '300px'`。CSS長さが利用可能                  |
+| delay                 | Typewriterの `lineDelay`。別途 `speed`, `startDelay`, `punctuationDelay` |
+| onSpeechingDone       | Typewriterの `onComplete`                                                |
+| 4方向固定             | 12配置と自動反転・画面内補正                                             |
+| 常時表示              | `open` で制御、閉じるアニメーション後にアンマウント                      |
+| 固定色・固定枠        | variant、CSS変数、className、style                                       |
+| React 16 / 17         | React / React DOM 18.3.1または19                                         |
+| UMD/ESM               | ESM/CJS、各型宣言、CSS。UMDのscriptタグ読込は廃止                        |
 
 ## 意味が変わる部分
 
