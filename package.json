@@ -1,6 +1,6 @@
 {
   "name": "react-fukidashi",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.2",
   "description": "Composable React speech bubbles, anchored positioning and controllable typewriter animation",
   "type": "module",
   "main": "./dist/cjs/index.js",
