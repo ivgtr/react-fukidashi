@@ -31,10 +31,11 @@ jobs:
           python3 .github/prepare-v2-stable.py
           npm version 2.0.0 --no-git-tag-version
           npm ci --ignore-scripts
-          rm .github/prepare-v2-stable.py .github/workflows/v2-review-snapshot.yml
+          rm .github/prepare-v2-stable.py
           npm run format
-      - name: Commit preparation to this branch only
+      - name: Commit non-workflow changes to this branch only
         run: |
+          git restore --source=HEAD --worktree .github/workflows
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add --all
