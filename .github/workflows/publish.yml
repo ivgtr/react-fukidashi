@@ -4,31 +4,46 @@ on:
     types: [published]
 permissions:
   contents: read
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-          cache: npm
-      - run: npm ci
-      - run: npm run check
-      - name: Validate release tag and select npm tag
+          package-manager-cache: false
+      - name: Validate release tag and npm version
         id: release
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           node --input-type=module <<'NODE'
           import { readFileSync, appendFileSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
           const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
           if (process.env.RELEASE_TAG !== `v${version}`) throw new Error('Release tag must match package version');
+          const npmVersion = execFileSync('npm', ['--version'], { encoding: 'utf8' }).trim();
+          const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(npmVersion);
+          if (!match) throw new Error(`Unexpected npm version: ${npmVersion}`);
+          const [major, minor, patch] = match.slice(1).map(Number);
+          if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) {
+            throw new Error(`Trusted publishing requires npm >= 11.5.1; found ${npmVersion}`);
+          }
+          console.log(`Publishing react-fukidashi@${version} with Node ${process.version} / npm ${npmVersion}`);
           appendFileSync(process.env.GITHUB_OUTPUT, `tag=${version.includes('-') ? 'beta' : 'latest'}\n`);
           NODE
-      - run: npm publish --tag "${{ steps.release.outputs.tag }}" --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm ci
+      - run: npm run check
+      - name: Publish with npm trusted publishing
+        run: npm publish --provenance --tag "${{ steps.release.outputs.tag }}" --access public
