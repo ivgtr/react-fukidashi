@@ -1,30 +1,48 @@
-name: Prepare v2 review snapshot
+name: Prepare stable v2 validation
 on:
   push:
     branches: [release/v2-stable]
     paths: [.github/workflows/v2-review-snapshot.yml]
 permissions:
-  contents: read
+  contents: write
 jobs:
-  snapshot:
+  prepare:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
-          persist-credentials: false
+          ref: release/v2-stable
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version: 24
           package-manager-cache: false
-      - run: npm ci
-      - name: Archive only tracked sources and installed dependencies
+      - name: Check version availability
         run: |
-          git archive HEAD -o "$RUNNER_TEMP/review-source.tar"
-          tar -rf "$RUNNER_TEMP/review-source.tar" node_modules
-          gzip "$RUNNER_TEMP/review-source.tar"
+          test -z "$(git ls-remote --tags origin refs/tags/v2.0.0)"
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import assert from 'node:assert/strict';
+          const versions = JSON.parse(execFileSync('npm', ['view', 'react-fukidashi', 'versions', '--json'], { encoding: 'utf8' }));
+          assert.ok(!versions.includes('2.0.0'), '2.0.0 is already published');
+          NODE
+      - name: Prepare metadata and regression fixtures
+        run: |
+          python3 .github/prepare-v2-stable.py
+          npm version 2.0.0 --no-git-tag-version
+          npm ci --ignore-scripts
+          rm .github/prepare-v2-stable.py .github/workflows/v2-review-snapshot.yml
+          npm run format
+      - name: Commit preparation to this branch only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --all
+          git commit -m 'fix: stabilize text layout and prepare verified v2 distribution'
+          git push origin HEAD:release/v2-stable
+          git archive HEAD -o "$RUNNER_TEMP/stable-source.tar"
       - uses: actions/upload-artifact@v4
         with:
-          name: review-source
-          path: ${{ runner.temp }}/review-source.tar.gz
+          name: stable-source
+          path: ${{ runner.temp }}/stable-source.tar
           retention-days: 1
