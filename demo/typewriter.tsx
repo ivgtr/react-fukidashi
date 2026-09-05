@@ -20,7 +20,18 @@ function Fixture() {
       <button onClick={() => typing.current?.reset()}>Reset</button>
       <output aria-label="Completions">{completions}</output>
       <div style={{ width, maxWidth: '100%', font: '20px/1.4 Arial, sans-serif' }}>
-        <Typewriter ref={typing} data-testid="typing" text={text} speed={25} lineDelay={0} punctuationDelay={0} paused={paused} cursor={params.get('cursor') === 'false' ? null : '▍'} reserveSpace={params.get('reserve') !== 'false'} onComplete={() => setCompletions((count) => count + 1)} />
+        <Typewriter
+          ref={typing}
+          data-testid="typing"
+          text={text}
+          speed={25}
+          lineDelay={0}
+          punctuationDelay={0}
+          paused={paused}
+          cursor={params.get('cursor') === 'false' ? null : '▍'}
+          reserveSpace={params.get('reserve') !== 'false'}
+          onComplete={() => setCompletions((count) => count + 1)}
+        />
       </div>
       <div style={{ width, maxWidth: '100%', font: '20px/1.4 Arial, sans-serif' }}>
         <span className="fukidashi-typewriter" data-testid="reference" aria-hidden="true">
@@ -31,4 +42,8 @@ function Fixture() {
   );
 }
 
-createRoot(document.getElementById('root')!).render(<StrictMode><Fixture /></StrictMode>);
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <Fixture />
+  </StrictMode>,
+);

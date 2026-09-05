@@ -9,10 +9,18 @@ it('keeps full grapheme nodes in place, revealing them without changing the text
   vi.useFakeTimers();
   const ref = createRef<TypewriterControls>();
   const text = 'か\u3099👩🏽‍💻\nAB';
-  const { container } = render(<Typewriter ref={ref} text={text} speed={100} lineDelay={0} punctuationDelay={0} cursor="▍" />);
+  const { container } = render(
+    <Typewriter ref={ref} text={text} speed={100} lineDelay={0} punctuationDelay={0} cursor="▍" />,
+  );
   const nodes = [...container.querySelectorAll('.fukidashi-character')];
   expect(nodes).toHaveLength(5);
-  expect(nodes.map((node) => node.firstChild?.textContent)).toEqual(['か\u3099', '👩🏽‍💻', '\n', 'A', 'B']);
+  expect(nodes.map((node) => node.firstChild?.textContent)).toEqual([
+    'か\u3099',
+    '👩🏽‍💻',
+    '\n',
+    'A',
+    'B',
+  ]);
   act(() => vi.advanceTimersByTime(100));
   expect(nodes[0]?.getAttribute('data-visible')).toBe('true');
   expect(nodes[1]?.getAttribute('data-visible')).toBe('false');
@@ -27,7 +35,9 @@ it('keeps full grapheme nodes in place, revealing them without changing the text
 
 it('preserves the growing-text opt-out and can toggle reserved layout during playback', () => {
   vi.useFakeTimers();
-  const { container, rerender } = render(<Typewriter text="ABC" speed={100} reserveSpace={false} />);
+  const { container, rerender } = render(
+    <Typewriter text="ABC" speed={100} reserveSpace={false} />,
+  );
   act(() => vi.advanceTimersByTime(100));
   expect(container.querySelector('.fukidashi-typewriter-visible')?.textContent).toBe('A');
   expect(container.querySelector('.fukidashi-character')).toBeNull();

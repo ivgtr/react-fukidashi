@@ -127,30 +127,42 @@
   transform: none;
 }
 .fukidashi-typewriter {
+  position: relative;
   display: inline-grid;
   vertical-align: top;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.fukidashi-typewriter-space,
 .fukidashi-typewriter-visible {
   grid-area: 1 / 1;
   min-width: 0;
-}
-.fukidashi-typewriter-space {
-  visibility: hidden;
-  pointer-events: none;
-  user-select: none;
-}
-.fukidashi-typewriter-visible {
   align-self: start;
 }
+.fukidashi-character {
+  position: relative;
+}
+.fukidashi-character[data-visible='false'] {
+  visibility: hidden;
+}
+/* Position the cursor at the next grapheme without inserting a line-break
+   opportunity into the text. It remains visible inside an unrevealed span. */
+.fukidashi-character > .fukidashi-cursor {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  visibility: visible;
+}
 .fukidashi-cursor {
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
   display: inline-block;
   width: 0;
   animation: fukidashi-blink 1s step-end infinite;
 }
 .fukidashi-sr-only {
+  -webkit-user-select: none;
+  user-select: none;
   position: absolute;
   width: 1px;
   height: 1px;

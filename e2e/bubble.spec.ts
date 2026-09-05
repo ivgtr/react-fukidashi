@@ -14,9 +14,10 @@ test('playground supports skip, replay, themes and a desktop screenshot', async 
   await expect(page.locator('.play-status')).toHaveText('お話し中…');
   await page.getByRole('button', { name: '一時停止', exact: true }).click();
   const visible = page.locator('.fukidashi-positioner .fukidashi-typewriter-visible');
-  const paused = await visible.textContent();
+  const revealed = visible.locator('.fukidashi-character[data-visible="true"]');
+  const paused = await revealed.allTextContents();
   await page.waitForTimeout(200);
-  expect(await visible.textContent()).toBe(paused);
+  expect(await revealed.allTextContents()).toEqual(paused);
   await page.getByLabel('テーマ').selectOption('dark');
   await expect(page.locator('.fukidashi-positioner .fukidashi-bubble')).toHaveAttribute(
     'data-variant',
@@ -125,9 +126,10 @@ test('reacts to an OS motion preference changed while typing without rewinding',
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(page.locator('.play-status')).toHaveText('お話し完了');
   const visible = page.locator('.fukidashi-positioner .fukidashi-typewriter-visible');
-  const full = await visible.textContent();
+  const revealed = visible.locator('.fukidashi-character[data-visible="true"]');
+  const full = await revealed.allTextContents();
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.waitForTimeout(100);
-  expect(await visible.textContent()).toBe(full);
+  expect(await revealed.allTextContents()).toEqual(full);
   await expect(page.locator('.play-status')).toHaveText('お話し完了');
 });

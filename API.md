@@ -89,7 +89,7 @@ import 'react-fukidashi/style.css';
 `Typewriter` はspanのHTML属性と、次のpropsも受け付けます。
 
 - `cursor`: カーソルとして描画するReactNode。既定はなし。例: `'▍'`。
-- `reserveSpace`: 全文相当の領域を確保し、文字送りによるレイアウトの跳ねを抑えます。既定は `true`。
+- `reserveSpace`: 全文を書記素ごとのインライン要素として配置し、折り返し位置を保ったまま順に表示します。既定は `true`。`false` は表示済み文字だけでレイアウトするため、途中で折り返し位置が変わります。
 - `ref`: DOMではなく `TypewriterControls` を受け取ります。
 
 ### Controls
@@ -130,6 +130,8 @@ export function Dialogue() {
 }
 ```
 
+領域確保中の未表示文字とカーソルは選択・コピーの対象外です。表示済み文字は通常どおり選択できます。幅・フォントが変わった場合は通常のテキストと同様に再レイアウトされます。
+
 タイマーは一つだけ使い、停止中は残り時間を保持します。速度を変えても表示済みの文字は消しません。`text` の内容が変わると新しい再生に切り替えます。同じ内容の配列や新しいコールバックを渡しても再生し直しません。
 
 `onComplete` は全文表示または `skip()` 時に一度だけ呼び、アンマウント時には呼びません。`reset()` すると再度通知の対象になります。空文字も完了と扱います。`paused={true}` はrefの `resume()` では解除できません。
@@ -156,12 +158,13 @@ OSが動きを減らす設定なら入退場を即時化し、文字送りも全
 
 ```sh
 npm run check
-npx playwright install chromium
+npx playwright install chromium firefox webkit
 npm run test:e2e
+npm run test:consumer
 npm run build
 npm run build:docs
 ```
 
-`check` は型チェック・単体テスト・ビルド・配布物検査・デモのビルド・整形確認を実行します。`test:e2e` はChromiumでの回帰テスト、`build` は `dist/`、`build:docs` は `docs/` への出力です。Firefox / Safari、実機スクリーンリーダーは別途確認してください。
+`check` は型チェック・単体テスト・ビルド・配布物検査・デモのビルド・整形確認を実行します。`test:e2e` はChromium・Firefox・WebKitでの回帰テスト、`build` は `dist/`、`build:docs` は `docs/` への出力です。`test:consumer` は実際のtarballをリポジトリ外のReactアプリへインストールし、ESM/CJS・SSR・型解決・CSS・本番ビルドを確認します。CIではその本番アプリも3エンジンで描画します。WebKitの自動テストは実機Safariの確認とは異なり、実機スクリーンリーダーとともに別途確認が必要です。
 
 npm公開はGitHub Releaseから行います。タグとpackage.jsonのversionが一致した場合のみ公開し、プレリリースは `beta`、安定版は `latest` を使います。PRの作成・マージだけでは公開しません。

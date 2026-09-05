@@ -1,5 +1,13 @@
 import { createElement } from 'react';
-import { Bubble, Fukidashi, Typewriter, useTypewriter, useReducedMotion, type FukidashiStyle, type TypewriterControls } from 'react-fukidashi';
+import {
+  Bubble,
+  Fukidashi,
+  Typewriter,
+  useTypewriter,
+  useReducedMotion,
+  type FukidashiStyle,
+  type TypewriterControls,
+} from 'react-fukidashi';
 
 const style: FukidashiStyle = { '--fukidashi-width': '280px' };
 createElement(Bubble, { style, tail: { side: 'left' } }, 'Hello');
