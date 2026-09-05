@@ -1,30 +1,34 @@
 name: Publish to npm
-
 on:
   release:
     types: [published]
-
+permissions:
+  contents: read
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v2
+      - uses: actions/checkout@v4
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - uses: actions/setup-node@v2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
-      - name: install
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - name: Validate release tag and select npm tag
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          npm ci
-      - name: Build
-        run: npm run build
-      - name: Publish
-        uses: JS-DevTools/npm-publish@v1
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-          package: ./package.json
+          node --input-type=module <<'NODE'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
+          if (process.env.RELEASE_TAG !== `v${version}`) throw new Error('Release tag must match package version');
+          appendFileSync(process.env.GITHUB_OUTPUT, `tag=${version.includes('-') ? 'beta' : 'latest'}\n`);
+          NODE
+      - run: npm publish --tag "${{ steps.release.outputs.tag }}" --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

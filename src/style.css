@@ -1,0 +1,102 @@
+.fukidashi-anchor { display: inline-flex; vertical-align: middle; }
+.fukidashi-positioner { width: max-content; max-width: calc(100vw - 24px); }
+.fukidashi-bubble {
+  --fukidashi-background: #fffdf8;
+  --fukidashi-color: #292720;
+  --fukidashi-border-color: #ded8cb;
+  --fukidashi-border-width: 1px;
+  --fukidashi-radius: 16px;
+  --fukidashi-padding: 18px;
+  --fukidashi-shadow: 0 8px 28px #29272012;
+  position: relative;
+  box-sizing: border-box;
+  width: var(--fukidashi-width, fit-content);
+  max-width: min(var(--fukidashi-max-width, 24rem), var(--fukidashi-available-width, calc(100vw - 24px)));
+  border: var(--fukidashi-border-width) solid var(--fukidashi-border-color);
+  border-radius: var(--fukidashi-radius);
+  background: var(--fukidashi-background);
+  color: var(--fukidashi-color);
+  box-shadow: var(--fukidashi-shadow);
+  font: inherit;
+  line-height: 1.65;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+.fukidashi-bubble[data-variant='dark'] {
+  --fukidashi-background: #24252d;
+  --fukidashi-color: #f4f1fa;
+  --fukidashi-border-color: #444550;
+  --fukidashi-shadow: 0 10px 32px #17182026;
+}
+.fukidashi-bubble[data-variant='comic'] {
+  --fukidashi-background: #fff;
+  --fukidashi-color: #202020;
+  --fukidashi-border-color: #202020;
+  --fukidashi-border-width: 2px;
+  --fukidashi-radius: 8px;
+  --fukidashi-shadow: 4px 4px 0 #202020;
+}
+.fukidashi-content {
+  position: relative;
+  box-sizing: border-box;
+  max-height: calc(var(--fukidashi-available-height, 100000px) - 2 * var(--fukidashi-border-width));
+  padding: var(--fukidashi-padding);
+  overflow: auto;
+}
+.fukidashi-tail {
+  position: absolute;
+  box-sizing: border-box;
+  width: var(--fukidashi-tail-size);
+  height: var(--fukidashi-tail-size);
+  background: var(--fukidashi-background);
+  border: 0 solid var(--fukidashi-border-color);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.fukidashi-tail[data-side='top'], .fukidashi-tail[data-side='bottom'] {
+  left: calc(clamp(var(--fukidashi-tail-size), var(--fukidashi-tail-offset), calc(100% - var(--fukidashi-tail-size))) - var(--fukidashi-tail-size) / 2);
+}
+.fukidashi-tail[data-side='left'], .fukidashi-tail[data-side='right'] {
+  top: calc(clamp(var(--fukidashi-tail-size), var(--fukidashi-tail-offset), calc(100% - var(--fukidashi-tail-size))) - var(--fukidashi-tail-size) / 2);
+}
+.fukidashi-tail[data-side='top'] {
+  top: calc(-1 * (var(--fukidashi-tail-size) + var(--fukidashi-border-width)) / 2);
+  border-top-width: var(--fukidashi-border-width); border-left-width: var(--fukidashi-border-width);
+}
+.fukidashi-tail[data-side='bottom'] {
+  bottom: calc(-1 * (var(--fukidashi-tail-size) + var(--fukidashi-border-width)) / 2);
+  border-bottom-width: var(--fukidashi-border-width); border-right-width: var(--fukidashi-border-width);
+}
+.fukidashi-tail[data-side='left'] {
+  left: calc(-1 * (var(--fukidashi-tail-size) + var(--fukidashi-border-width)) / 2);
+  border-bottom-width: var(--fukidashi-border-width); border-left-width: var(--fukidashi-border-width);
+}
+.fukidashi-tail[data-side='right'] {
+  right: calc(-1 * (var(--fukidashi-tail-size) + var(--fukidashi-border-width)) / 2);
+  border-top-width: var(--fukidashi-border-width); border-right-width: var(--fukidashi-border-width);
+}
+.fukidashi-motion {
+  opacity: 1; transform: none; transform-origin: var(--fukidashi-origin, center);
+  transition: opacity var(--fukidashi-duration, 180ms) ease,
+    transform var(--fukidashi-duration, 180ms) cubic-bezier(.2, .8, .2, 1);
+}
+.fukidashi-motion[data-state='closed'] { opacity: 0; }
+.fukidashi-motion[data-state='closed'][data-motion='pop'] { transform: scale(.94); }
+.fukidashi-motion[data-state='closed'][data-motion='slide'] {
+  transform: translate(var(--fukidashi-enter-x, 0px), var(--fukidashi-enter-y, 6px));
+}
+.fukidashi-motion[data-motion='none'] { transition: none; opacity: 1; transform: none; }
+.fukidashi-typewriter { display: inline-grid; vertical-align: top; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fukidashi-typewriter-space, .fukidashi-typewriter-visible { grid-area: 1 / 1; min-width: 0; }
+.fukidashi-typewriter-space { visibility: hidden; pointer-events: none; user-select: none; }
+.fukidashi-typewriter-visible { align-self: start; }
+.fukidashi-cursor { display: inline-block; width: 0; animation: fukidashi-blink 1s step-end infinite; }
+.fukidashi-sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+@keyframes fukidashi-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .fukidashi-motion:not([data-reduced-motion='never']) { transition: none; transform: none; }
+  .fukidashi-cursor { animation: none; }
+}

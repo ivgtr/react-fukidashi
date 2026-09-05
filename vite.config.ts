@@ -1,20 +1,8 @@
-import reactPlugin from "@vitejs/plugin-react-refresh";
-import { defineConfig } from "vite";
-import linariaPlugin from "vite-plugin-linaria";
-import * as packageJson from "./package.json";
+import { defineConfig } from 'vite';
 
-const config = defineConfig({
-  build: {
-    lib: {
-      entry: "./src/index.ts",
-      name: "react-fukidashi",
-    },
-    outDir: "dist",
-    rollupOptions: {
-      external: [...Object.keys(packageJson.peerDependencies)],
-    },
-  },
-  plugins: [reactPlugin(), linariaPlugin()],
+export default defineConfig({
+  root: 'demo',
+  base: './',
+  build: { outDir: '../docs', emptyOutDir: true },
+  server: { host: '127.0.0.1', port: 4173, strictPort: true },
 });
-
-export default config;
