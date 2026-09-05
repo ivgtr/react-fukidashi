@@ -73,7 +73,7 @@ it('keeps an exiting bubble inert when the portal container changes', async () =
 it('hydrates server-rendered Japanese text without replacing the server DOM', async () => {
   const ui = (
     <Bubble>
-      <Typewriter text="か\u3099 👨‍👩‍👧‍👦" paused />
+      <Typewriter text={'か\u3099 👨‍👩‍👧‍👦'} paused />
     </Bubble>
   );
   const container = document.createElement('div');

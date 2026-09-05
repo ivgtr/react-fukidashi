@@ -11,7 +11,9 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
+      fail-fast: false
       matrix:
         include:
           - node: 22
@@ -27,11 +29,16 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
-      - if: matrix.react == 18
-        run: npm install --no-save --package-lock=false react@18.3.1 react-dom@18.3.1 @types/react@18 @types/react-dom@18
+      - name: Install React 18 compatibility dependencies
+        if: matrix.react == 18
+        run: |
+          npm install --save-dev --save-exact react@18.3.1 react-dom@18.3.1 @types/react@18 @types/react-dom@18
+          npx prettier --write package.json
+      - run: npm ls react react-dom
       - run: npm run check
   browser:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
