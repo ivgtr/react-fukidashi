@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { readFileSync, realpathSync } from 'node:fs';
+import { lstatSync, readFileSync, realpathSync } from 'node:fs';
 import { isAbsolute, relative } from 'node:path';
 import { createElement } from 'react';
 import { renderToString } from 'react-dom/server';
@@ -8,6 +8,22 @@ import * as esm from 'react-fukidashi';
 
 const require = createRequire(import.meta.url);
 const cjs = require('react-fukidashi');
+for (const name of [
+  'react-fukidashi',
+  'react',
+  'react-dom',
+  '@floating-ui/react-dom',
+  'typescript',
+  'vite',
+]) {
+  const resolved = realpathSync(require.resolve(name));
+  const location = relative(`${process.cwd()}/node_modules`, resolved);
+  assert.ok(
+    !location.startsWith('..') && !isAbsolute(location),
+    `${name} must resolve inside the isolated app`,
+  );
+  assert.equal(lstatSync(`node_modules/${name}`).isSymbolicLink(), false);
+}
 const location = relative(process.cwd(), realpathSync(require.resolve('react-fukidashi')));
 assert.ok(
   !location.startsWith('..') && !isAbsolute(location),

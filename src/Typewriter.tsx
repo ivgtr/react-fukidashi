@@ -13,6 +13,7 @@ import type { ReactNode, RefObject } from 'react';
 import type { TypewriterControls, TypewriterProps } from './types.js';
 import { segmentText } from './text.js';
 import { useTypewriter } from './hooks/useTypewriter.js';
+import { observeCopy } from './copy.js';
 
 const highlightName = 'fukidashi-unrevealed';
 
@@ -111,6 +112,7 @@ export const Typewriter = forwardRef<TypewriterControls, TypewriterProps>(functi
   useEffect(() => {
     const view = visual.current?.ownerDocument.defaultView;
     setSupported(Boolean(view?.CSS?.highlights && typeof view.Highlight === 'function'));
+    if (visual.current) return observeCopy(visual.current.ownerDocument);
   }, []);
   const typing = useTypewriter({
     text,

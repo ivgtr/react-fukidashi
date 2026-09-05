@@ -102,7 +102,7 @@ for (const sample of cases) {
   });
 }
 
-test('full message is selectable once during playback and exposed once to assistive technology', async ({
+test('copies only revealed text and exposes the full message once to assistive technology', async ({
   page,
 }) => {
   const text = 'Copy this text safely.';
@@ -117,18 +117,28 @@ test('full message is selectable once during playback and exposed once to assist
     await page.clock.runFor(25);
     await expect(typing).toHaveAttribute('data-visible-length', String(count));
   }
-  const selectText = () =>
+  const copyText = () =>
     typing.evaluate((root) => {
       const selection = window.getSelection()!;
       selection.removeAllRanges();
       selection.selectAllChildren(root);
-      return selection.toString();
+      const before = selection.toString();
+      const data = new DataTransfer();
+      const event = new ClipboardEvent('copy', {
+        bubbles: true,
+        cancelable: true,
+        clipboardData: data,
+      });
+      root.dispatchEvent(event);
+      if (selection.toString() !== before) throw new Error('Copy changed the selection');
+      if (data.getData('text/html')) throw new Error('Hidden HTML leaked into the clipboard');
+      return data.getData('text/plain');
     });
-  expect(await selectText()).toBe(text);
+  expect(await copyText()).toBe('Copy');
   await expect(typing).toMatchAriaSnapshot(`- text: ${text}`);
   await page.getByRole('button', { name: 'Skip', exact: true }).dispatchEvent('click');
   await expect(typing).toHaveAttribute('data-status', 'complete');
-  expect(await selectText()).toBe(text);
+  expect(await copyText()).toBe(text);
   await expect(typing).toMatchAriaSnapshot(`- text: ${text}`);
 });
 
@@ -150,4 +160,69 @@ test('unsupported highlights fall back to complete text without leaving it invis
   await expect(page.getByTestId('typing')).toHaveAttribute('data-status', 'complete');
   await expect(page.getByTestId('typing').locator('.fukidashi-typewriter-visible')).toBeVisible();
   await expect(page.getByLabel('Completions')).toHaveText('1');
+});
+
+for (const reserve of [true, false]) {
+  test(`native clipboard excludes hidden text and cursor (reserveSpace=${reserve})`, async ({
+    page,
+  }) => {
+    await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+    await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
+    await page.goto(`/typewriter.html?text=Copy%20this%20safely.&reserve=${reserve}`);
+    const typing = page.getByTestId('typing');
+    await expect(typing).toHaveAttribute('data-status', 'paused');
+    await page.getByRole('button', { name: 'Start', exact: true }).dispatchEvent('click');
+    await expect(typing).toHaveAttribute('data-status', 'typing');
+    for (let count = 1; count <= 4; count++) {
+      await page.clock.runFor(25);
+      await expect(typing).toHaveAttribute('data-visible-length', String(count));
+    }
+    await typing.evaluate((root) => {
+      const field = document.createElement('textarea');
+      field.id = 'paste-target';
+      document.body.append(field);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.selectAllChildren(root);
+    });
+    await page.keyboard.press('Control+c');
+    await page.locator('#paste-target').focus();
+    await page.keyboard.press('Control+v');
+    await expect(page.locator('#paste-target')).toHaveValue('Copy');
+  });
+}
+
+test('copy preserves a backwards selection spanning surrounding text and multiple instances', async ({
+  page,
+}) => {
+  await page.goto('/typewriter.html?text=Hidden');
+  const typing = page.getByTestId('typing');
+  await expect(typing).toHaveAttribute('data-status', 'paused');
+  const result = await typing.evaluate((root) => {
+    const host = document.createElement('div');
+    const before = document.createTextNode('Before ');
+    const middle = document.createTextNode(' between ');
+    const after = document.createTextNode(' after');
+    // Keep the real instance mounted; add a second equivalent presentation.
+    root.parentElement!.insertBefore(host, root);
+    host.append(before, root, middle, root.cloneNode(true), after);
+    const instances = host.querySelectorAll('.fukidashi-typewriter');
+    instances[0]!.setAttribute('data-visible-length', '2');
+    instances[1]!.setAttribute('data-visible-length', '3');
+    const selection = window.getSelection()!;
+    selection.setBaseAndExtent(after, after.length, before, 0);
+    const data = new DataTransfer();
+    host.dispatchEvent(
+      new ClipboardEvent('copy', { bubbles: true, cancelable: true, clipboardData: data }),
+    );
+    return {
+      text: data.getData('text/plain'),
+      restored:
+        selection.anchorNode === after &&
+        selection.anchorOffset === after.length &&
+        selection.focusNode === before &&
+        selection.focusOffset === 0,
+    };
+  });
+  expect(result).toEqual({ text: 'Before Hi between Hid after', restored: true });
 });
