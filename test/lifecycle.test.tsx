@@ -73,11 +73,12 @@ it('keeps an exiting bubble inert when the portal container changes', async () =
 it('hydrates server-rendered Japanese text without replacing the server DOM', async () => {
   const ui = (
     <Bubble>
-      <Typewriter text={'か\u3099 👨‍👩‍👧‍👦'} paused />
+      <Typewriter text={'か\u3099 👨‍👩‍👧‍👦'} paused cursor="▍" />
     </Bubble>
   );
   const container = document.createElement('div');
   container.innerHTML = renderToString(ui);
+  expect(container.querySelector('.fukidashi-cursor')).toBeNull();
   document.body.append(container);
   const existing = container.firstChild;
   const errors: unknown[] = [];
@@ -87,6 +88,7 @@ it('hydrates server-rendered Japanese text without replacing the server DOM', as
   });
   expect(errors).toEqual([]);
   expect(container.firstChild).toBe(existing);
+  expect(container.querySelector('.fukidashi-cursor[data-overlay]')).not.toBeNull();
   expect(container.querySelector('.fukidashi-sr-only')?.textContent).toBe('か\u3099 👨‍👩‍👧‍👦');
   act(() => root?.unmount());
   container.remove();
