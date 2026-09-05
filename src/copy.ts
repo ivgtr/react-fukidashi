@@ -56,13 +56,27 @@ export function copyVisibleText(event: ClipboardEvent) {
   if (!changed) return;
   const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
   try {
-    // Selection.toString preserves browser whitespace/block separators, unlike
-    // Range.toString. Restore the user's selection synchronously, without DOM edits.
+    const rendered = (range: Range) => {
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return selection.toString();
+    };
+    const sourceText = new Map(original.map((range) => [range, rendered(range)]));
+    // Measure prefixes of the ORIGINAL selection. Selecting each surviving
+    // fragment separately lets WebKit trim whitespace at fragment boundaries.
+    // These offsets also retain the browser's block/line-break serialization.
     const text = parts
       .map((part) => {
-        selection.removeAllRanges();
-        selection.addRange(part);
-        return selection.toString();
+        const source = original.find(
+          (range) =>
+            compare(part, false, range, false) >= 0 && compare(part, true, range, true) <= 0,
+        )!;
+        const prefix = source.cloneRange();
+        prefix.setEnd(part.startContainer, part.startOffset);
+        const start = rendered(prefix).length;
+        prefix.setEnd(part.endContainer, part.endOffset);
+        const end = rendered(prefix).length;
+        return sourceText.get(source)!.slice(start, end);
       })
       .join('');
     event.clipboardData.clearData();

@@ -117,23 +117,26 @@ test('copies only revealed text and exposes the full message once to assistive t
     await page.clock.runFor(25);
     await expect(typing).toHaveAttribute('data-visible-length', String(count));
   }
-  const copyText = () =>
-    typing.evaluate((root) => {
+  const copyText = async () => {
+    await typing.evaluate((root) => {
       const selection = window.getSelection()!;
       selection.removeAllRanges();
       selection.selectAllChildren(root);
-      const before = selection.toString();
-      const data = new DataTransfer();
-      const event = new ClipboardEvent('copy', {
-        bubbles: true,
-        cancelable: true,
-        clipboardData: data,
-      });
-      root.dispatchEvent(event);
-      if (selection.toString() !== before) throw new Error('Copy changed the selection');
-      if (data.getData('text/html')) throw new Error('Hidden HTML leaked into the clipboard');
-      return data.getData('text/plain');
     });
+    await page.keyboard.press('Control+c');
+    expect(
+      await typing.evaluate((root) => {
+        const selection = window.getSelection()!;
+        return (
+          selection.anchorNode === root &&
+          selection.anchorOffset === 0 &&
+          selection.focusNode === root &&
+          selection.focusOffset === root.childNodes.length
+        );
+      }),
+    ).toBe(true);
+    return pasteClipboard(page);
+  };
   expect(await copyText()).toBe('Copy');
   await expect(typing).toMatchAriaSnapshot(`- text: ${text}`);
   await page.getByRole('button', { name: 'Skip', exact: true }).dispatchEvent('click');
@@ -198,8 +201,9 @@ test('copy preserves a backwards selection spanning surrounding text and multipl
   await page.goto('/typewriter.html?text=Hidden');
   const typing = page.getByTestId('typing');
   await expect(typing).toHaveAttribute('data-status', 'paused');
-  const result = await typing.evaluate((root) => {
+  await typing.evaluate((root) => {
     const host = document.createElement('div');
+    host.id = 'copy-host';
     const before = document.createTextNode('Before ');
     const middle = document.createTextNode(' between ');
     const after = document.createTextNode(' after');
@@ -211,18 +215,31 @@ test('copy preserves a backwards selection spanning surrounding text and multipl
     instances[1]!.setAttribute('data-visible-length', '3');
     const selection = window.getSelection()!;
     selection.setBaseAndExtent(after, after.length, before, 0);
-    const data = new DataTransfer();
-    host.dispatchEvent(
-      new ClipboardEvent('copy', { bubbles: true, cancelable: true, clipboardData: data }),
-    );
-    return {
-      text: data.getData('text/plain'),
-      restored:
-        selection.anchorNode === after &&
-        selection.anchorOffset === after.length &&
-        selection.focusNode === before &&
-        selection.focusOffset === 0,
-    };
   });
-  expect(result).toEqual({ text: 'Before Hi between Hid after', restored: true });
+  await page.keyboard.press('Control+c');
+  expect(
+    await page.locator('#copy-host').evaluate((host) => {
+      const selection = window.getSelection()!;
+      return (
+        selection.anchorNode === host.lastChild &&
+        selection.anchorOffset === host.lastChild!.textContent!.length &&
+        selection.focusNode === host.firstChild &&
+        selection.focusOffset === 0
+      );
+    }),
+  ).toBe(true);
+  expect(await pasteClipboard(page)).toBe('Before Hi between Hid after');
 });
+
+async function pasteClipboard(page: Page) {
+  await page.evaluate(() => {
+    const target = document.createElement('textarea');
+    target.id = 'clipboard-result';
+    document.body.append(target);
+    target.focus();
+  });
+  await page.keyboard.press('Control+v');
+  const text = await page.locator('#clipboard-result').inputValue();
+  await page.locator('#clipboard-result').evaluate((target) => target.remove());
+  return text;
+}

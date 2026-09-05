@@ -5,8 +5,12 @@ test('playground supports skip, replay, themes and a desktop screenshot', async 
 }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
+  // Keep initial playback from completing while a slower browser loads the demo.
+  await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+  await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'ことばに、表情を。' })).toBeVisible();
+  await page.clock.runFor(250);
   await page.getByRole('button', { name: '全文表示', exact: true }).click();
   // <output> elements also have an implicit status role; select the playback status.
   await expect(page.locator('.play-status')).toHaveText('お話し完了');
@@ -15,7 +19,7 @@ test('playground supports skip, replay, themes and a desktop screenshot', async 
   await page.getByRole('button', { name: '一時停止', exact: true }).click();
   const visible = page.locator('.fukidashi-positioner .fukidashi-typewriter');
   const paused = await visible.getAttribute('data-visible-length');
-  await page.waitForTimeout(200);
+  await page.clock.runFor(200);
   expect(await visible.getAttribute('data-visible-length')).toBe(paused);
   await page.getByLabel('テーマ').selectOption('dark');
   await expect(page.locator('.fukidashi-positioner .fukidashi-bubble')).toHaveAttribute(

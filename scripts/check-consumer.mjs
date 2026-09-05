@@ -65,7 +65,7 @@ try {
         2,
       ),
     );
-    run(npm, ['install', '--ignore-scripts', '--no-audit', '--no-fund']);
+    run(npm, ['install', '--include=dev', '--ignore-scripts', '--no-audit', '--no-fund']);
     run(process.execPath, ['node_modules/typescript/bin/tsc', '-p', 'tsconfig.json']);
     run(process.execPath, ['node_modules/typescript/bin/tsc', '-p', 'tsconfig.nodenext.json']);
     run(process.execPath, ['check-node.mjs']);
