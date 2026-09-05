@@ -144,6 +144,7 @@ try {
         await page.getByRole('button', { name: '開閉' }).dispatchEvent('click');
         await page.clock.runFor(250);
         await expect(page.getByRole('note')).toBeVisible();
+        await expect(page.locator('.fukidashi-motion')).toHaveCSS('opacity', '1');
         await expect(page.getByRole('note')).toContainText('インストールしたパッケージです。');
         const images = join(root, 'test-results');
         mkdirSync(images, { recursive: true });
