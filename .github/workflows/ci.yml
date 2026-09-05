@@ -36,9 +36,14 @@ jobs:
           npx prettier --write package.json
       - run: npm ls react react-dom
       - run: npm run check
+      - run: npm run test:consumer
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,12 +53,13 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npm run test:e2e -- --project=${{ matrix.browser }}
+      - run: npm run test:consumer -- --browser=${{ matrix.browser }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: browser-report
+          name: browser-report-${{ matrix.browser }}
           path: |
             playwright-report/
             test-results/
