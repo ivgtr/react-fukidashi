@@ -24,7 +24,8 @@ it('keeps full grapheme nodes in place, revealing them without changing the text
   act(() => vi.advanceTimersByTime(100));
   expect(nodes[0]?.getAttribute('data-visible')).toBe('true');
   expect(nodes[1]?.getAttribute('data-visible')).toBe('false');
-  expect(nodes[1]?.querySelector('.fukidashi-cursor')).not.toBeNull();
+  expect(container.querySelector('.fukidashi-cursor[data-overlay]')).not.toBeNull();
+  expect(nodes.every((node) => node.childNodes.length === 1)).toBe(true);
   act(() => ref.current?.skip());
   expect([...container.querySelectorAll('.fukidashi-character')]).toEqual(nodes);
   expect(nodes.every((node) => node.getAttribute('data-visible') === 'true')).toBe(true);

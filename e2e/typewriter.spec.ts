@@ -40,10 +40,15 @@ const cases = [
 
 for (const sample of cases) {
   test(`keeps every revealed character in its final position: ${sample.name}`, async ({ page }) => {
-    await page.clock.install();
-    await page.clock.pauseAt(new Date());
+    await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+    await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
     await page.goto(
-      `/typewriter.html?${new URLSearchParams({ text: sample.text, width: String(sample.width), lang: sample.lang ?? 'en', dir: sample.dir ?? 'ltr' })}`,
+      `/typewriter.html?${new URLSearchParams({
+        text: sample.text,
+        width: String(sample.width),
+        lang: sample.lang ?? 'en',
+        dir: sample.dir ?? 'ltr',
+      })}`,
     );
     const typing = page.getByTestId('typing');
     await expect(typing).toHaveAttribute('data-status', 'paused');
@@ -70,31 +75,50 @@ for (const sample of cases) {
     await expect(typing).toHaveAttribute('data-status', 'complete');
     await expect(page.getByLabel('Completions')).toHaveText('1');
     expect(Math.abs((await typing.boundingBox())!.height - before!.height)).toBeLessThan(0.6);
-    // Inline spans must preserve ordinary shaping and line-breaking, not just
-    // keep a consistently wrong per-letter/inline-block layout.
-    const reference = await page.getByTestId('reference').evaluate((root) => {
-      const node = root.querySelector('.fukidashi-typewriter-visible')!.firstChild!;
+    // Compare whole words with ordinary text. A per-letter Range can include
+    // an entire ligature in a split text node but only half in a single node.
+    // WebKit also rounds text-fragment bounds differently at subpixel edges.
+    const words = await page.evaluate(() => {
+      const root = document.querySelector('[data-testid="typing"]')!;
+      const reference = document.querySelector('[data-testid="reference"]')!;
+      const plain = reference.querySelector('.fukidashi-typewriter-visible')!.firstChild!;
       const origin = root.getBoundingClientRect();
-      return [
-        ...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(node.textContent!),
-      ].map(({ index, segment }) => {
-        const range = document.createRange();
-        range.setStart(node, index);
-        range.setEnd(node, index + segment.length);
-        const rect = range.getBoundingClientRect();
-        return { x: rect.x - origin.x, y: rect.y - origin.y };
-      });
+      const refOrigin = reference.getBoundingClientRect();
+      const nodes = [...root.querySelectorAll('.fukidashi-character')].map((el) => el.firstChild!);
+      const locate = (offset: number, end = false) => {
+        for (const node of nodes) {
+          if (offset < node.textContent!.length || (end && offset === node.textContent!.length))
+            return { node, offset };
+          offset -= node.textContent!.length;
+        }
+        const node = nodes[nodes.length - 1]!;
+        return { node, offset: node.textContent!.length };
+      };
+      return [...new Intl.Segmenter(undefined, { granularity: 'word' }).segment(plain.textContent!)]
+        .filter(({ segment }) => segment.trim())
+        .map(({ index, segment }) => {
+          const start = locate(index);
+          const end = locate(index + segment.length, true);
+          const actual = document.createRange();
+          actual.setStart(start.node, start.offset);
+          actual.setEnd(end.node, end.offset);
+          const expected = document.createRange();
+          expected.setStart(plain, index);
+          expected.setEnd(plain, index + segment.length);
+          const a = actual.getBoundingClientRect();
+          const b = expected.getBoundingClientRect();
+          return {
+            segment,
+            x: a.x - origin.x - b.x + refOrigin.x,
+            y: a.y - origin.y - b.y + refOrigin.y,
+            width: a.width - b.width,
+          };
+        });
     });
-    const final = await positions(page);
-    for (let index = 0; index < reference.length; index++) {
-      // Newline range rects differ between inline text nodes and plain text in some engines.
-      if (
-        sample.text &&
-        (await typing.locator('.fukidashi-character').nth(index).textContent()) === '\n'
-      )
-        continue;
-      expect(Math.abs(final[index]!.x - reference[index]!.x)).toBeLessThan(0.6);
-      expect(Math.abs(final[index]!.y - reference[index]!.y)).toBeLessThan(0.6);
+    for (const word of words) {
+      expect(Math.abs(word.x), word.segment).toBeLessThanOrEqual(1);
+      expect(Math.abs(word.y), word.segment).toBeLessThanOrEqual(1);
+      expect(Math.abs(word.width), word.segment).toBeLessThanOrEqual(1);
     }
   });
 }
@@ -103,8 +127,8 @@ test('selection contains only revealed text, with no hidden text or cursor dupli
   page,
 }) => {
   const text = 'Copy this text safely.';
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+  await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
   await page.goto(`/typewriter.html?text=${encodeURIComponent(text)}`);
   const typing = page.getByTestId('typing');
   await expect(typing).toHaveAttribute('data-status', 'paused');
