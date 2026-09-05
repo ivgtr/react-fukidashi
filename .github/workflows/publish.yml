@@ -32,7 +32,26 @@ jobs:
           import { readFileSync, appendFileSync } from 'node:fs';
           import { execFileSync } from 'node:child_process';
           const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
-          if (process.env.RELEASE_TAG !== `v${version}`) throw new Error('Release tag must match package version');
+          const expectedTag = `v${version}`;
+          const releaseTag = process.env.RELEASE_TAG;
+          console.log(`Release tag: ${releaseTag ?? '(missing)'}`);
+          console.log(`package.json version: ${version}`);
+          console.log(`Expected release tag: ${expectedTag}`);
+          if (releaseTag !== expectedTag) {
+            throw new Error(
+              `Release tag mismatch: received ${JSON.stringify(releaseTag ?? null)}, expected ${JSON.stringify(expectedTag)}. ` +
+              'Update package.json and both root version fields in package-lock.json, merge the version-update PR, ' +
+              'then create a NEW tag from that commit. Re-running an old release or editing its title does not update the tagged code. See PUBLISHING.md.'
+            );
+          }
+          const lock = JSON.parse(readFileSync('package-lock.json', 'utf8'));
+          if (lock.version !== version || lock.packages?.['']?.version !== version) {
+            throw new Error(
+              `Package version mismatch: package.json=${version}, package-lock.json=${lock.version}, ` +
+              `package-lock.json packages[""].version=${lock.packages?.['']?.version}. ` +
+              'Keep all three project-version fields in sync. See PUBLISHING.md.'
+            );
+          }
           const npmVersion = execFileSync('npm', ['--version'], { encoding: 'utf8' }).trim();
           const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(npmVersion);
           if (!match) throw new Error(`Unexpected npm version: ${npmVersion}`);

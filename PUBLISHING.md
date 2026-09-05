@@ -23,33 +23,46 @@ GitHub側に新しいSecretやEnvironmentを作る必要はありません。ワ
 
 ## Release
 
-1. 公開するバージョンを決め、作業ブランチで `npm version` を実行します。次の例は `2.0.0-beta.1` が未公開の場合です。
+ローカル環境は不要です。**先にファイル内のバージョンを更新してmainへマージし、その後に新しいタグとReleaseを作成します。** Releaseのタグ名やタイトルを変えても、ファイルのバージョンは自動更新されません。
 
-   ```sh
-   npm version 2.0.0-beta.1 --no-git-tag-version
-   npm ci
-   npm run check
-   ```
+次は `2.0.0-beta.2` を公開する例です。以降の公開では、npmで未公開かつGitタグも未使用のバージョンに読み替えてください。
 
-2. 更新された `package.json` と `package-lock.json` をコミットし、PRでmainへマージします。この段階ではタグを作りません。
-3. GitHubの **Releases → Draft a new release** で、バージョンに `v` を付けた新規タグ（例: `v2.0.0-beta.1`）をmainから作成します。プレリリースなら **Set as a pre-release** を選び、**Publish release** を実行します。
-4. **Actions → Publish to npm** の成功と、npm上のバージョン・provenanceを確認します。
+1. GitHubの **Code** 画面でmainから作業ブランチを作り、次の3か所をすべて `2.0.0-beta.2` に揃えます。依存パッケージのバージョンは変更しません。
+   - `package.json` の `version`
+   - `package-lock.json` 冒頭の `version`
+   - `package-lock.json` の `packages[""].version`
+2. 更新した2ファイルのPRを作成し、CI成功を確認してmainへマージします。バージョン更新済みのPRをマージした場合、この編集は不要です。
+3. mainの `package.json` が `2.0.0-beta.2` になったことを確認してから、**Releases → Draft a new release** を開きます。**新規タグ `v2.0.0-beta.2`、Target `main`** を選びます。既存の `v2.0.0-beta.0` / `v2.0.0-beta.1` は選びません。
+4. ベータ版なので **Set as a pre-release** を選び、**Publish release** を実行します。ビルド・検証・npm公開はActionsが行います。
+5. **Actions → Publish to npm** の成功と、npm上のバージョン・provenanceを確認します。
 
-タグ名は `v${package.jsonのversion}` と完全一致が必要です。npmのdist-tagはバージョンに `-` があれば `beta`、なければ `latest` です。GitHubのpre-releaseチェックだけでは切り替わりません。
+タグ名は `v${package.jsonのversion}` と完全一致が必要です。lockfileの2か所も一致を検査します。不一致のまま公開したり、公開時だけファイルを自動で書き換えたりはしません。npmのdist-tagはバージョンに `-` があれば `beta`、なければ `latest` です。GitHubのpre-releaseチェックだけでは切り替わりません。
+
+ローカルで作業する場合は、手順1の編集を次のコマンドでも行えます。`--no-git-tag-version` により、ここではコミットやタグを作成しません。
+
+```sh
+npm version 2.0.0-beta.2 --no-git-tag-version
+npm ci
+npm run check
+```
+
+公開後は、npmのパッケージページ、または次のコマンドで確認できます。
 
 ```sh
 npm view react-fukidashi dist-tags --json
-npm view react-fukidashi@2.0.0-beta.1 version
+npm view react-fukidashi@2.0.0-beta.2 version
 npm install react-fukidashi@beta
 ```
 
-## 旧ワークフローで失敗したリリース
+## 失敗したリリースの再試行
 
-既存の `v2.0.0-beta.0` はトークン認証のワークフローを含むコミットを指しています。移行PRのマージ後に古い実行をRe-runしても、元のコミットのワークフローが使われるためOIDCへ切り替わりません。
+`v2.0.0-beta.0` はトークン認証の旧ワークフローを含むコミットを指しています。`v2.0.0-beta.1` はOIDC移行後のコミットですが、ファイル内のバージョンが `2.0.0-beta.0` のままだったため、タグ一致チェックで停止しました。
 
-移行後のmainでバージョンを更新し、新しいタグとReleaseから公開してください。既存タグの削除・付け替えや、公開済みバージョンの上書きは行いません。上記の `2.0.0-beta.1` はそのための例です。
+**古い実行をRe-runしても、元のコミット・タグが使われます。** mainを修正しても既存タグの内容は変わりません。今回の復旧では、バージョン更新を含むPRをマージしてから、上の手順で新しい `v2.0.0-beta.2` をmainから作成してください。既存タグの削除・付け替えや、公開済みバージョンの上書きは行いません。
 
-OIDC移行後の実行でnpm側の登録値だけを修正した場合は、その実行をRe-runできます。ただし同じバージョンがすでに公開されていないことを確認してください。
+タグ不一致のログには、実際のReleaseタグ、`package.json` のバージョン、期待するタグ名が表示されます。公開対象コミットを選び間違えていないかも確認してください。
+
+OIDC移行後の実行でnpm側の登録値だけを修正した場合は、その実行をRe-runできます。ただし同じバージョンがすでに公開されていないことを確認してください。PRのCI成功は、npmへの認証成功を意味しません。
 
 ## 移行後
 
