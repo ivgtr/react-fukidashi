@@ -48,7 +48,7 @@ function App() {
           <span className="brand-mark" aria-hidden="true">
             f.
           </span>{' '}
-          react-fukidashi <span className="version">v2 beta</span>
+          react-fukidashi <span className="version">v2</span>
         </a>
         <a className="repo-link" href="https://github.com/ivgtr/react-fukidashi">
           GitHub ↗

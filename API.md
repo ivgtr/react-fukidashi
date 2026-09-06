@@ -89,7 +89,7 @@ import 'react-fukidashi/style.css';
 `Typewriter` はspanのHTML属性と、次のpropsも受け付けます。
 
 - `cursor`: カーソルとして描画するReactNode。既定はなし。例: `'▍'`。
-- `reserveSpace`: 全文相当の領域を確保し、文字送りによるレイアウトの跳ねを抑えます。既定は `true`。
+- `reserveSpace`: 全文を一つのテキストノードとして配置し、CSS Custom Highlight APIで未表示範囲を隠します。折り返し・字間・合字を保ったまま書記素単位で表示します。既定は `true`。`false` は表示済み文字だけでレイアウトするため、途中で折り返し位置が変わります。
 - `ref`: DOMではなく `TypewriterControls` を受け取ります。
 
 ### Controls
@@ -130,6 +130,8 @@ export function Dialogue() {
 }
 ```
 
+コピー時は選択範囲内の表示済み文字だけをプレーンテキストとして渡し、未表示部分・カーソル・読み上げ用の重複テキストを除外します。全文のDOMはレイアウト用に維持するため、`textContent` や `Selection.toString()` で取得する文字列とは異なります。アプリ側の `onCopy` で `preventDefault()` した場合は、その処理を優先します。幅・フォントが変わった場合は通常のテキストと同様に再レイアウトされます。CSS Custom Highlight API非対応の環境では、領域確保モードの文字送りを省略して全文を表示します（完了通知も一度だけ行います）。
+
 タイマーは一つだけ使い、停止中は残り時間を保持します。速度を変えても表示済みの文字は消しません。`text` の内容が変わると新しい再生に切り替えます。同じ内容の配列や新しいコールバックを渡しても再生し直しません。
 
 `onComplete` は全文表示または `skip()` 時に一度だけ呼び、アンマウント時には呼びません。`reset()` すると再度通知の対象になります。空文字も完了と扱います。`paused={true}` はrefの `resume()` では解除できません。
@@ -156,12 +158,13 @@ OSが動きを減らす設定なら入退場を即時化し、文字送りも全
 
 ```sh
 npm run check
-npx playwright install chromium
+npx playwright install chromium firefox webkit
 npm run test:e2e
+npm run test:consumer
 npm run build
 npm run build:docs
 ```
 
-`check` は型チェック・単体テスト・ビルド・配布物検査・デモのビルド・整形確認を実行します。`test:e2e` はChromiumでの回帰テスト、`build` は `dist/`、`build:docs` は `docs/` への出力です。Firefox / Safari、実機スクリーンリーダーは別途確認してください。
+`check` は型チェック・単体テスト・ビルド・配布物検査・デモのビルド・整形確認を実行します。`test:e2e` はChromium・Firefox・WebKitでの回帰テスト、`build` は `dist/`、`build:docs` は `docs/` への出力です。`test:consumer` は実際のtarballをリポジトリ外のReactアプリへインストールし、React 18/19それぞれのESM/CJS・SSR・型解決・CSS・本番ビルドを確認します。`-- --browser=chromium`（または `firefox` / `webkit`）を付けると、両React版の本番アプリでサーバーDOMを維持したhydrationと文字送り・開閉操作も確認します。CIでも3エンジンで実行します。WebKitの自動テストは実機Safariの確認とは異なり、実機スクリーンリーダーとともに別途確認が必要です。
 
 npm公開はGitHub Releaseから行います。タグとpackage.jsonのversionが一致した場合のみ公開し、プレリリースは `beta`、安定版は `latest` を使います。PRの作成・マージだけでは公開しません。

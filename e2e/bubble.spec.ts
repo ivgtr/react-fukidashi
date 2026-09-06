@@ -5,18 +5,22 @@ test('playground supports skip, replay, themes and a desktop screenshot', async 
 }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
+  // Keep initial playback from completing while a slower browser loads the demo.
+  await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+  await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'ことばに、表情を。' })).toBeVisible();
+  await page.clock.runFor(250);
   await page.getByRole('button', { name: '全文表示', exact: true }).click();
   // <output> elements also have an implicit status role; select the playback status.
   await expect(page.locator('.play-status')).toHaveText('お話し完了');
   await page.getByRole('button', { name: '再生し直す' }).click();
   await expect(page.locator('.play-status')).toHaveText('お話し中…');
   await page.getByRole('button', { name: '一時停止', exact: true }).click();
-  const visible = page.locator('.fukidashi-positioner .fukidashi-typewriter-visible');
-  const paused = await visible.textContent();
-  await page.waitForTimeout(200);
-  expect(await visible.textContent()).toBe(paused);
+  const visible = page.locator('.fukidashi-positioner .fukidashi-typewriter');
+  const paused = await visible.getAttribute('data-visible-length');
+  await page.clock.runFor(200);
+  expect(await visible.getAttribute('data-visible-length')).toBe(paused);
   await page.getByLabel('テーマ').selectOption('dark');
   await expect(page.locator('.fukidashi-positioner .fukidashi-bubble')).toHaveAttribute(
     'data-variant',
@@ -88,16 +92,25 @@ test('flips and shifts at the viewport edge, and contains tall content', async (
 test('keeps exit animation, blocks exiting focus targets, and cancels stale exits', async ({
   page,
 }) => {
+  await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
   await page.goto('/fixture.html');
   await expect(page.locator('.fukidashi-motion')).toHaveCSS('opacity', '1');
-  await page.getByRole('button', { name: 'Toggle', exact: true }).click();
+  await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
+  const toggle = page.getByRole('button', { name: 'Toggle', exact: true });
+  // Do not let browser actionability waits consume the 160ms exit deadline.
+  await toggle.dispatchEvent('click');
   const positioner = page.locator('.fukidashi-positioner');
   await expect(positioner).toHaveAttribute('inert', '');
   await expect(positioner).toHaveAttribute('aria-hidden', 'true');
-  await page.getByRole('button', { name: 'Toggle', exact: true }).click();
+  await page.clock.runFor(80);
+  await expect(positioner).toHaveCount(1);
+  await toggle.dispatchEvent('click');
+  await page.clock.runFor(250);
   await expect(page.locator('.fukidashi-motion')).toHaveCSS('opacity', '1');
   await expect(page.getByLabel('Exits')).toHaveText('0');
-  await page.getByRole('button', { name: 'Toggle', exact: true }).click();
+  await toggle.dispatchEvent('click');
+  await expect(positioner).toHaveAttribute('inert', '');
+  await page.clock.runFor(250);
   await expect(positioner).toHaveCount(0);
   await expect(page.getByLabel('Exits')).toHaveText('1');
 });
@@ -124,10 +137,10 @@ test('reacts to an OS motion preference changed while typing without rewinding',
   await expect(page.locator('.play-status')).toHaveText('お話し中…');
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(page.locator('.play-status')).toHaveText('お話し完了');
-  const visible = page.locator('.fukidashi-positioner .fukidashi-typewriter-visible');
-  const full = await visible.textContent();
+  const visible = page.locator('.fukidashi-positioner .fukidashi-typewriter');
+  const full = await visible.getAttribute('data-visible-length');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.waitForTimeout(100);
-  expect(await visible.textContent()).toBe(full);
+  expect(await visible.getAttribute('data-visible-length')).toBe(full);
   await expect(page.locator('.play-status')).toHaveText('お話し完了');
 });

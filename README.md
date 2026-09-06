@@ -12,7 +12,11 @@
 
 ## Usage
 
-以下はv2のAPIです。開発版を試すには [Development](#development) を参照してください。React / React DOM 18.3.1以降の18系、または19系に対応しています。
+```sh
+npm install react-fukidashi
+```
+
+React / React DOM 18.3.1以降の18系、または19系に対応しています。
 
 ```tsx
 import { Fukidashi, Typewriter } from 'react-fukidashi';

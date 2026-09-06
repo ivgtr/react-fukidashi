@@ -26,6 +26,8 @@ const [pack] = JSON.parse(
 );
 const paths = pack.files.map((file) => file.path);
 for (const path of [
+  'API.md',
+  'MIGRATION.md',
   'dist/index.js',
   'dist/index.d.ts',
   'dist/cjs/index.js',
@@ -35,7 +37,7 @@ for (const path of [
 ])
   assert.ok(paths.includes(path), path);
 assert.ok(
-  !paths.some((path) => /^(demo|test|e2e|src)\//.test(path)),
+  !paths.some((path) => /^(demo|test|e2e|src|fixtures)\//.test(path)),
   'Do not publish development sources',
 );
 console.log(`Package exports, SSR, declarations, CSS and ${paths.length} packed files verified.`);

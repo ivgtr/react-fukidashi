@@ -1,6 +1,6 @@
 {
   "name": "react-fukidashi",
-  "version": "2.0.0-beta.2",
+  "version": "2.0.0",
   "description": "Composable React speech bubbles, anchored positioning and controllable typewriter animation",
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -22,7 +22,8 @@
   },
   "files": [
     "dist",
-    "MIGRATION.md"
+    "MIGRATION.md",
+    "API.md"
   ],
   "sideEffects": [
     "**/*.css"
@@ -59,7 +60,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "npm run typecheck && npm test && npm run build && npm run test:package && npm run build:docs && npm run format:check",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "test:consumer": "npm run build && node scripts/check-consumer.mjs"
   },
   "dependencies": {
     "@floating-ui/react-dom": "^2.1.6"
